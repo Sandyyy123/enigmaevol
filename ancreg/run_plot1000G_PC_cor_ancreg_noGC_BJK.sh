@@ -8,5 +8,5 @@
 # 
 
 #-----
-Rscript /data/clusterfs/lag/users/gokala/plot1000G_PC_cor_ancreg_noGC_BJK.R
+Rscript /data/clusterfs/lag/users/gokala/enigma-evol/plot1000G_PC_cor_ancreg_noGC_BJK.R
 

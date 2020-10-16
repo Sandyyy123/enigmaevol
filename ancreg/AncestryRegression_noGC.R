@@ -10,7 +10,7 @@ args = commandArgs(trailingOnly=TRUE)
 f1000G="/data/clusterfs/lag/users/gokala/genlang-evol/1kg_phase3_ns.allpop.unrel2261_eigenvec.P1to20_beta_se_pval.Rdata"
 load(f1000G)
 ##directory of spearman's output
-outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/"
+outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/dataframe_mergedGR/" #test for the issue about mergedGR S4 <-> data.frame
 ##Rdata files containing GWAS summary statistics
 rdatafileloc = "/data/clusterfs/lag/users/gokala/enigma-evol/sumstatsRdata"
 #/data/clusterfs/lag/users/gokala/beta/
@@ -74,6 +74,8 @@ for (i in 1:nrow(allfileloc)) {
                       merged$P18beta + merged$P19beta + merged$P20beta); 
     ##Get the summary of the model
     smodelfit = summary(modelfit);
+    #plot(merged$BETA,merged$P1beta)
+    #abline(lm(merged$BETA ~ merged$P1beta,merged))
     ##These are the estimates of the ancestry corrected beta values
     ##Note that this does not include the intercept in the model (modelfit above)
     ##This makes it very slightly different than the resid(modelfit)

@@ -24,7 +24,7 @@ while read line; do
    LINE=$line
    tmp_file_name=$(basename "$line")
    echo $tmp_file_name
-   pheno_name="$(cut -d'_' -f2,4 <<<"$tmp_file_name")"
+   pheno_name="$(cut -d'_' -f4,6,8 <<<"$tmp_file_name")"
    echo $pheno_name
    tmp_run_file="${outDir}scripts/${pheno_name}.sh"
    echo '#!/bin/sh

@@ -10,10 +10,10 @@
 options(stringsAsFactors=FALSE)
 library(GenomicRanges);
 
-dircorvals = "/data/clusterfs/lag/users/gokala/beta/ancreg/"
+dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_corvals/"
 #"P:/workspaces/lg-genlang/Working/Evolution/all_corvals/"
 ##Output file
-foutput = "/data/clusterfs/lag/users/gokala/beta/ancreg/corvalues_residual_BJK.pdf"
+foutput = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_corvals/corvalues_residual_BJK.pdf"
 #"P:/workspaces/lg-genlang/Working/Evolution/test_ancreg.pdf"
 
 fcorvals = dir(dircorvals,pattern="ancreg_BJK",full.names=TRUE);
@@ -52,9 +52,9 @@ dev.off()
 options(stringsAsFactors=FALSE)
 library(GenomicRanges);
 
-dircorvals = "/data/clusterfs/lag/users/gokala/beta/ancreg/";
+dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_corvals/";
 ##Output file
-foutput = "/data/clusterfs/lag/users/gokala/beta/ancreg/corvalues_residual_BJK_allinone.pdf";
+foutput = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_corvals/corvalues_residual_BJK_allinone.pdf";
 
 fcorvals = dir(dircorvals,pattern="ancreg_BJK",full.names=TRUE);
 ind = grep("ancreg",fcorvals);
