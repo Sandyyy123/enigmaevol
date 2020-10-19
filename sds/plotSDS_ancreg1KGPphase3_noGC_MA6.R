@@ -4,7 +4,8 @@ library(gplots);
 #setwd('~/Documents/papers/ENIGMA-Evolution/RegionalPlottingFreesurfer');
 
 ##Load in all the Freesurfer surfaces
-load('FreesurferRegionalObjs.Rdata')
+freesurfer="/data/clusterfs/lag/users/gokala/enigma-evol/sds/FreesurferRegionalObjs.Rdata"
+load("FreesurferRegionalObjs.Rdata")
 
 ##Correlations with SDS scores at different thresholds
 #Set colorbar values
