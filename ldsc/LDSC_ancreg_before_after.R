@@ -2,16 +2,15 @@
 library(tidyverse)
 library(here)
 
-
 #regionordering = read.csv("plotting/freesurfer_orderandcolor.csv")
 intercepts <- read_csv("/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/LDSC_intercepts_w_and_wo_ancreg.csv", col_names = TRUE)
 intercepts_surf <- intercepts[intercepts$Surf_Thic == "Surface Area",]
 intercepts_thic <- intercepts[intercepts$Surf_Thic == "Thickness",]
 #intercepts$Region = factor(intercepts$Region, levels = regionordering$Region)
 #intercepts$Region <- fct_rev(intercepts$Region)
-View(intercepts_surf)
-## Plot for surface area
 
+## Plot for surface area
+#View(intercepts_surf)
 intercepts_sterr_surf <- intercepts_surf %>% 
   select(Region, Anc_reg, LDSC_int_sterr) %>% 
   spread(Anc_reg, LDSC_int_sterr)
@@ -39,7 +38,7 @@ Surf_plot_surf
 ggsave("/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/LDSC_ancreg_Rdata_before_after_w_errorbars_surfaceArea.pdf", width = 7, height = 9, unit = "in")
 
 ## Plot for thickness
-View(intercepts_sterr_thic)
+
 intercepts_sterr_thic <- intercepts_thic %>% 
   select(Region, Anc_reg, LDSC_int_sterr) %>% 
   spread(Anc_reg, LDSC_int_sterr)

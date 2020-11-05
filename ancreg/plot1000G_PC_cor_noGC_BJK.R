@@ -10,10 +10,10 @@
 options(stringsAsFactors=FALSE)
 library(GenomicRanges);
 
-dircorvals = "/data/clusterfs/lag/users/gokala"
+dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/corvals/"
 #"P:/workspaces/lg-genlang/Working/Evolution/all_corvals/"
 ##Output file
-foutput = "/data/clusterfs/lag/users/gokala/corvalues_BJK.pdf"
+foutput = "/data/clusterfs/lag/users/gokala/enigma-evol/corvalues_BJK.pdf"
 #"P:/workspaces/lg-genlang/Working/Evolution/test_corvalsPlot.pdf"
 
 fcorvals = dir(dircorvals,full.names=TRUE,pattern="csv");

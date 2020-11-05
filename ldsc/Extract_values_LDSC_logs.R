@@ -46,12 +46,12 @@ for (i in 1:length(all_files)) {
          "LDSC_int_sterr" = as.numeric(values[6]))
   intercepts <<- rbind(intercepts, to_add)
 }
-View(intercepts)
+
 #regionordering = read.csv(here("scripts", "1000Genomes_Phase3_Analysis","plotting","freesurfer_orderandcolor_Height.csv"))
 
 #intercepts$Region = factor(intercepts$Region, levels = regionordering$Region)
 #intercepts$Surf_Thic = factor(intercepts$Surf_Thic)
-
+View(intercepts)
 write_csv(intercepts, "/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/LDSC_intercepts_w_and_wo_ancreg.csv")
 ## For making initial plots
 

@@ -10,7 +10,7 @@ args = commandArgs(trailingOnly=TRUE)
 f1000G="/data/clusterfs/lag/users/gokala/genlang-evol/1kg_phase3_ns.allpop.unrel2261_eigenvec.P1to20_beta_se_pval.Rdata"
 load(f1000G)
 ##directory of spearman's output
-outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/dataframe_mergedGR/" #test for the issue about mergedGR S4 <-> data.frame
+outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/"
 ##Rdata files containing GWAS summary statistics
 rdatafileloc = "/data/clusterfs/lag/users/gokala/enigma-evol/sumstatsRdata"
 #/data/clusterfs/lag/users/gokala/beta/

@@ -12,12 +12,12 @@ load("FreesurferRegionalObjs.Rdata")
 minZ = -0.0165;
 maxZ = 0.0165;
     
-fcorvals = (paste0("../SDS_ancreg1KGPphase3_noGC_MA6/SDS_bjk_ancreg_1kblocks.csv"));
+fcorvals = (paste0("/data/clusterfs/lag/users/gokala/enigma-evol/l-r/sds/SDS_bjk_non-ancreg_1kblocks.csv"));
 corvals = read.csv(fcorvals);
-thisSA = corvals[c(grep("surfavg",corvals$X),grep("Mean_Full_SurfArea",corvals$X)),];
-thisSA$region = sapply(thisSA$X,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]});
-thisTH = corvals[c(grep("thickavg",corvals$X),grep("Mean_Full_Thickness",corvals$X)),];
-thisTH$region = sapply(thisTH$X,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]});
+thisSA = corvals[grep("surf",corvals$X),];
+thisSA$region = sapply(as.character(thisSA$X),function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]});
+thisTH = corvals[grep("thick",corvals$X),];
+thisTH$region = sapply(as.character(thisTH$X),function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]});
 
 ##Take only the left hemisphere obj files (everything in ENIGMA is mean bilateral)
 ##So no need for both hemispheres

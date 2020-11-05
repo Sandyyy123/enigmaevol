@@ -12,13 +12,14 @@
 # $rdataDir - Directory containing GWAS summary statistics (in Rdata format)
 # $outDir - Directory to write Spearman's correlation test results
 # $rdataList - A txt file containing the list of "/path/to/dir/summary_statisctics.Rdata" of all phenotypes
-rdataDir="/data/clusterfs/lag/users/gokala/enigma-evol"
-outDir="/data/clusterfs/lag/users/gokala/enigma-evol"
-rdataList="/data/clusterfs/lag/users/gokala/enigma-evol/sumstats_rdata_list.txt"
+rdataDir="/data/clusterfs/lag/users/gokala/enigma-evol/global"
+outDir="/data/clusterfs/lag/users/gokala/enigma-evol/corvals"
+rdataList="/data/clusterfs/lag/users/gokala/enigma-evol/global/sumstats_rdata_list.txt"
 
 #-----
 # Read rdataList
-cd /data/clusterfs/lag/users/gokala
+cd /data/clusterfs/lag/users/gokala/enigma-evol
+mkdir ${outDir}scripts
 while read line; do 
    echo $line
    LINE=$line
@@ -34,10 +35,10 @@ while read line; do
 #$ -S /bin/bash
 
 #-----Variables-----
-source run_1000G_PC_cor_BJK_noGC.sh
+#source run_1000G_PC_cor_BJK_noGC.sh
 
-/usr/local/lib64/R/bin/Rscript /data/clusterfs/lag/users/gokala/1000G_PC_cor_BJK_noGC.R $LINE $pheno_name $outDir' > $tmp_run_file
+/usr/local/lib64/R/bin/Rscript /data/clusterfs/lag/users/gokala/enigma-evol/1000G_PC_cor_BJK_noGC.R' $LINE $pheno_name $outDir > $tmp_run_file
    chmod a+x $tmp_run_file
    echo "Created the script for cluster ->  submitting ${pheno_name} to the Grid"
-   qsub -wd "/data/clusterfs/lag/users/gokala/beta/scripts" $tmp_run_file
+   qsub -wd "/data/clusterfs/lag/users/gokala/enigma-evol/corvals/scripts" $tmp_run_file
 done < $rdataList

@@ -6,11 +6,11 @@ library(GenomicRanges);
 ##load SDS file
 fSDS="/data/workspaces/lag/workspaces/lg-genlang/Working/Evolution/SDS/SDS_UK10K_n3195_release_Sep_19_2016.tab.gz"
 ##directory of spearman's output
-outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/sds"
+outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/l-r/sds"
 ##Rdata files containing GWAS summary statistics
-rdatafileloc = "/data/clusterfs/lag/users/gokala/enigma-evol/sumstatsRdata/"
+rdatafileloc = "/data/clusterfs/lag/users/gokala/enigma-evol/l-r/ancreg/"
 ##read in gwas statistics file (compiled for all traits)
-fGWASsumstats = "/data/clusterfs/lag/users/gokala/enigma-evol/sumstatsRdata/sumstats_rdata_list.txt"
+fGWASsumstats = "/data/clusterfs/lag/users/gokala/enigma-evol/l-r/ancreg/sumstats_rdata_list.txt"
 
 ##Read in SDS file
 SDS=read.table(fSDS, fill=TRUE, header=TRUE);
@@ -18,7 +18,7 @@ SDS=read.table(fSDS, fill=TRUE, header=TRUE);
 ##Match the Rdata file locations of sumstats, text file sumstats, and clumped files
 GWASsumstats=read.table(fGWASsumstats, header=FALSE)$V1;
 ##Parse to get trait name - UPDATE THIS PART ACCORDING TO YOUR PATH AND FILE NAMES
-tmpname = sapply(GWASsumstats,function (x) {unlist(strsplit(as.character(x),"/",fixed=TRUE))[9]});
+tmpname = sapply(GWASsumstats,function (x) {unlist(strsplit(as.character(x),"/",fixed=TRUE))[10]});
 phenoname = paste(sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[4]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[6]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[8]}),sep="_");
 allfileloc = data.frame(rdatafile=GWASsumstats);
 
