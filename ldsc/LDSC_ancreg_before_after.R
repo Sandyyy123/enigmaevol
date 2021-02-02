@@ -1,9 +1,12 @@
+
+
 ## Making a Cleveland dotplot for ENIGMA_Evolution Figure 2
 library(tidyverse)
 library(here)
 
+
 #regionordering = read.csv("plotting/freesurfer_orderandcolor.csv")
-intercepts <- read_csv("/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/LDSC_intercepts_w_and_wo_ancreg.csv", col_names = TRUE)
+intercepts <- read_csv("/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/replication_v1_LDSC_intercepts_w_and_wo_ancreg.csv", col_names = TRUE)
 intercepts_surf <- intercepts[intercepts$Surf_Thic == "Surface Area",]
 intercepts_thic <- intercepts[intercepts$Surf_Thic == "Thickness",]
 #intercepts$Region = factor(intercepts$Region, levels = regionordering$Region)
@@ -11,31 +14,32 @@ intercepts_thic <- intercepts[intercepts$Surf_Thic == "Thickness",]
 
 ## Plot for surface area
 #View(intercepts_surf)
-intercepts_sterr_surf <- intercepts_surf %>% 
-  select(Region, Anc_reg, LDSC_int_sterr) %>% 
-  spread(Anc_reg, LDSC_int_sterr)
+#intercepts_sterr_surf <- intercepts_surf %>% 
+#  select(Region, Anc_reg, LDSC_int_sterr) %>% 
+#  spread(Anc_reg, LDSC_int_sterr)
   
-intercepts_wide_surf <- intercepts_surf %>% 
-  select(Region, Anc_reg, LDSC_intercept) %>% 
-  spread(Anc_reg, LDSC_intercept)
+#intercepts_wide_surf <- intercepts_surf %>% 
+#  select(Region, Anc_reg, LDSC_intercept) %>% 
+#  spread(Anc_reg, LDSC_intercept)
 
-plot_data_surf <- left_join(intercepts_wide_surf, intercepts_sterr_surf, by = c("Region"), suffix = c(".intercept", ".sterr"))
+#plot_data_surf <- left_join(intercepts_wide_surf, intercepts_sterr_surf, by = c("Region"), suffix = c(".intercept", ".sterr"))
+#plot_data_surf$Region <- factor(plot_data_surf$Region,levels=rev(unique(plot_data_surf$Region)))
+intercepts_surf = intercepts_surf[c(which(intercepts_surf$Region=="global"),which(intercepts_surf$Region!="global")),] # move Full to the top
+my.order = seq(1,68,1)
 
 Surf_plot_surf <- intercepts_surf %>% 
-  filter(Surf_Thic == "Surface Area") %>% 
-  ggplot(aes(x = Region, y = LDSC_intercept, color = Anc_reg, group = Anc_reg)) + 
+  ggplot(aes(x = fct_rev(reorder(Region,my.order)), y = LDSC_intercept, color = Anc_reg, group = Anc_reg)) + 
   geom_errorbar(aes(ymax = LDSC_intercept + LDSC_int_sterr,  ymin = LDSC_intercept - LDSC_int_sterr), position = position_dodge(0.9)) +
   geom_point(position = position_dodge(0.9), size = 2)+
-  scale_color_manual(values=c("#af8dc3", "#7fbf7b"))+
+  scale_color_manual(name = "Ancestry regression", labels = c("After ancestry regression", "Prior to ancestry regression"),values=c("#af8dc3", "#7fbf7b"))+
   labs(y = "LDSC Intercept", 
        x = "Region", 
-       title = "Surface Area, Change in LDSC intercept",
-       subtitle = "Purple = before, green = after") +
+       title = "Changes in LDSC intercept due to ancestry regression") + 
   coord_flip() +
   theme_classic()
 Surf_plot_surf
 
-ggsave("/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/LDSC_ancreg_Rdata_before_after_w_errorbars_surfaceArea.pdf", width = 7, height = 9, unit = "in")
+ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/plots/replication_v1_LDSC_intercepts_before_after_ancreg_w_errorbars_surfaceArea.pdf", width = 7, height = 9, unit = "in")
 
 ## Plot for thickness
 
@@ -64,9 +68,6 @@ Surf_plot_thic <- intercepts_thic %>%
 Surf_plot_thic
 
 ggsave("/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/LDSC_ancreg_Rdata_before_after_w_errorbars_thickness.pdf", width = 7, height = 9, unit = "in")
-
-
-
 
 #old_before_intercepts <- read.csv(here("data", "LDSC_ancreg", "LDSC_intercepts_before_after_Phase3_ancreg_old_version.csv"))
 ################################

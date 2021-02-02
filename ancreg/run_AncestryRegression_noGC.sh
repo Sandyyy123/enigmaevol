@@ -1,7 +1,7 @@
 #!/bin/bash
 #$ -N AncestryRegression
 #$ -cwd
-#$ -q multi15.q ---> use single15.q instead?
+#$ -q single15.q
 #$ -S /bin/bash
 
 #-----Ancestry Regression-----
@@ -12,4 +12,4 @@
 # (taken from: https://bitbucket.org/jasonlouisstein/enigmaevolma6/src/master/1000Gphase3_PC_cor)
 
 #-----
-Rscript /data/clusterfs/lag/users/gokala/AncestryRegression_noGC.R
+Rscript /data/clusterfs/lag/users/gokala/enigma-evol/AncestryRegression_noGC.R

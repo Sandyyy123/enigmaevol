@@ -48,9 +48,9 @@ for (i in 1:length(fcorvals)) {
 dev.off();
 
 
-dircorvals = "/data/clusterfs/lag/users/gokala/beta/";
+dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/corvals/";
 ##Output file
-foutput = "/data/clusterfs/lag/users/gokala/beta/corvalues_BJK_allinone.pdf";
+foutput = "/data/clusterfs/lag/users/gokala/enigma-evol/corvalues_BJK_allinone.pdf";
 
 fcorvals = dir(dircorvals,full.names=TRUE,pattern="csv");
 ind = grep("corvalues",fcorvals);

@@ -10,20 +10,17 @@ args = commandArgs(trailingOnly=TRUE)
 f1000G="/data/clusterfs/lag/users/gokala/genlang-evol/1kg_phase3_ns.allpop.unrel2261_eigenvec.P1to20_beta_se_pval.Rdata"
 load(f1000G)
 ##directory of spearman's output
-outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/"
+outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/global/"
 ##Rdata files containing GWAS summary statistics
-rdatafileloc = "/data/clusterfs/lag/users/gokala/enigma-evol/sumstatsRdata"
-#/data/clusterfs/lag/users/gokala/beta/
-#P:/workspaces/lg-genlang/Working/Evolution/sumstats_rdata_list.txt
+rdatafileloc = "/data/clusterfs/lag/users/gokala/enigma-evol/sumstatsRdata/global"
 ##read in gwas statistics file (compiled for all traits)
-fGWASsumstats = "/data/clusterfs/lag/users/gokala/enigma-evol/sumstatsRdata/sumstats_rdata_list.txt"
-#P:/workspaces/lg-genlang/Working/Evolution/sumstats_rdata_list.txt
+fGWASsumstats = "/data/clusterfs/lag/users/gokala/enigma-evol/sumstatsRdata/global/sumstats_rdata_list.txt"
 
 ##Match the Rdata file locations of sumstats, text file sumstats, and clumped files
 GWASsumstats=read.table(fGWASsumstats, header=FALSE)$V1
 ##Parse to get trait name
-tmpname = sapply(as.character(GWASsumstats),function (x) {unlist(strsplit(x,"/",fixed=TRUE))[9]})
-phenoname = paste(sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[4]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[6]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[8]}),sep="_")
+tmpname = sapply(as.character(GWASsumstats),function (x) {unlist(strsplit(x,"/",fixed=TRUE))[10]})
+phenoname = paste(sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[7]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[8]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[9]}),sep="_")
 #phenoname = substr(tmpnamepheno,1,nchar(tmpnamepheno)-1)
 allfileloc = data.frame(rdatafile=GWASsumstats)
 
@@ -51,7 +48,7 @@ for (i in 1:nrow(allfileloc)) {
     }
     #GWAS = as.data.frame(mcols(MAranges));
     ##Merge 1kgp with GWAS
-    merged = merge(table, tmp_ss_table, by="SNP") ##x=kG, y=GWAS
+    merged = merge(table, mergedGR, by="SNP") ##x=kG, y=GWAS
     ##remove all NAs, keep only SNPs that have both measurements
     ind=which(!is.na(merged$BETA) & !is.na(merged$P1beta)) # added P1beta NA filtering as well, to filter out SNPs that don't have PC loading values in 1kG file.
     merged=merged[ind,]

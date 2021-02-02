@@ -9,24 +9,38 @@ library(GenomicRanges)
 library(biomaRt)
 library(diffloop)
 library(plotly) 
-library(here)
 
 # The functions for plotly plots are here:
-source(here("./plotting", "plotly_brainplot_functions.R"))
+source("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/scripts/enigmaevol/partherit/plotly_brainplot_functions.R")
 
 # Reading the partitioned heritability summary statistics
-HSE_7pcw <- read.delim("./partherit/results_tables/HSE_7pcw_active_merged_results_FDR35.txt", header = TRUE)
-HSE_7pcw$Region <- factor(HSE_7pcw$Region,levels=regionordering$Region)
-HSE_7pcw_SA <- HSE_7pcw %>% dplyr::filter(Analysis == "Surface Area")
-enrich_max <- max(HSE_7pcw_SA$Enrichment) #because we want all the plots on this figure to be using the same color axis
+HSE_7pcw <- read.delim("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_hemi_spec_glob/HSE_7pcw_active_merged_results_FDR35.txt", header = TRUE)
+HSE_7pcw_le = HSE_7pcw[grep("_le", HSE_7pcw$Region),]
+HSE_7pcw_re = HSE_7pcw[grep("_re", HSE_7pcw$Region),]
+HSE_7pcw_le[] <- lapply(HSE_7pcw_le, function(x) sub("_le", "", x, fixed = TRUE))
+HSE_7pcw_re[] <- lapply(HSE_7pcw_re, function(x) sub("_re", "", x, fixed = TRUE))
+#HSE_7pcw$Region <- factor(HSE_7pcw$Region,levels=regionordering$Region)
+HSE_7pcw_le$Region <- factor(HSE_7pcw_le$Region,levels=regionordering$Region)
+HSE_7pcw_re$Region <- factor(HSE_7pcw_re$Region,levels=regionordering$Region)
 
-
+#factor(HSE_7pcw$Region,levels=regionordering$Region)
+#HSE_7pcw_SA <- HSE_7pcw %>% dplyr::filter(Analysis == "Surface Area")
+HSE_7pcw_SA_le <- HSE_7pcw_le %>% dplyr::filter(Analysis == "Surface Area")
+HSE_7pcw_SA_re <- HSE_7pcw_re %>% dplyr::filter(Analysis == "Surface Area")
+#HSE_7pcw_TH <- HSE_7pcw %>% dplyr::filter(Analysis == "Thickness")
+#HSE_7pcw_TH_le <- HSE_7pcw_le %>% dplyr::filter(Analysis == "Thickness")
+#HSE_7pcw_TH_re <- HSE_7pcw_re %>% dplyr::filter(Analysis == "Thickness")
+#enrich_max <- max(HSE_7pcw_SA$Enrichment)
+HSE_7pcw_SA_le$Enrichment = as.double(HSE_7pcw_SA_le$Enrichment)
+enrich_max <- max(HSE_7pcw_SA_le$Enrichment) #because we want all the plots on this figure to be using the same color axis
 ## If the FDR-corrected pvalue is > 0.05, set the Enrichment to 0 so it's grey in the brain plot
-HSE_7pcw_SA$Enrichment_plot <- if_else(HSE_7pcw_SA$fdr >= 0.05, true = 0, false = HSE_7pcw_SA$Enrichment)
+#HSE_7pcw_SA$Enrichment_plot <- if_else(HSE_7pcw_SA$fdr >= 0.05, true = 0, false = HSE_7pcw_SA$Enrichment)
+HSE_7pcw_SA_le$Enrichment_plot <- if_else(HSE_7pcw_SA_le$fdr >= 0.05, true = 0, false = HSE_7pcw_SA_le$Enrichment)
+#P:/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/
 
-brainplot_full(dta = HSE_7pcw_SA,
-               out_prefix = "P:/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/partherit/plots/partherit_brainplots/",
-               out_suffix = "MA6_ancreg_Phase3_noGC",
+brainplot_full(dta = HSE_7pcw_SA_le,
+               out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/partherit/plots/partherit_brainplots/l-r_hemspecCov//",
+               out_suffix = "_left_ancreg_Phase3_noGC",
                loop_over = "Annotation",
                region_col = "Region",
                Z_col = "Enrichment_plot",
@@ -36,9 +50,9 @@ brainplot_full(dta = HSE_7pcw_SA,
                high_color = "darkred", 
                nonsig_color = "#BABABC")
 
-brainplot_SA(dta = HSE_7pcw_SA,
-               out_prefix = "P:/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/partherit/plots/partherit_brainplots/",
-               out_suffix = "MA6_ancreg_Phase3_noGC",
+brainplot_SA(dta = HSE_7pcw_SA_le,
+               out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/partherit/plots/partherit_brainplots/l-r_hemspecCov/",
+               out_suffix = "_left_ancreg_Phase3_noGC",
                loop_over = "Annotation",
                region_col = "Region",
                Z_col = "Enrichment_plot",
@@ -49,9 +63,9 @@ brainplot_SA(dta = HSE_7pcw_SA,
                nonsig_color = "#BABABC")
 
 
-brainplot_TH(dta = HSE_7pcw,
-             out_prefix = "P:/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/partherit/plots/partherit_brainplots/",
-             out_suffix = "MA^_ancreg_Phase3_noGC",
+brainplot_TH(dta = HSE_7pcw_TH_le,
+             out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/partherit/plots/partherit_brainplots/l-r_globalCov/",
+             out_suffix = "^_left_ancreg_Phase3_noGC",
              loop_over = "Annotation",
              region_col = "Region",
              Z_col = "Enrichment",
@@ -59,3 +73,56 @@ brainplot_TH(dta = HSE_7pcw,
              max_val = enrich_max,
              low_color = "midnightblue",
              high_color = "darkred")
+
+################
+
+# Reading the partitioned heritability summary statistics
+HSE_7pcw <- read.delim("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_with_global/NeanDepleted_results_FDR35.txt", header = TRUE)
+HSE_7pcw_le = HSE_7pcw[grep(" le _", HSE_7pcw$Region),]
+HSE_7pcw_re = HSE_7pcw[grep(" re _", HSE_7pcw$Region),]
+HSE_7pcw_le[] <- lapply(HSE_7pcw_le, function(x) sub(" le _", "", x, fixed = TRUE))
+HSE_7pcw_re[] <- lapply(HSE_7pcw_re, function(x) sub(" re _", "", x, fixed = TRUE))
+#HSE_7pcw$Region <- factor(HSE_7pcw$Region,levels=regionordering$Region)
+HSE_7pcw_le$Region <- factor(HSE_7pcw_le$Region,levels=regionordering$Region)
+HSE_7pcw_re$Region <- factor(HSE_7pcw_re$Region,levels=regionordering$Region)
+
+#factor(HSE_7pcw$Region,levels=regionordering$Region)
+#HSE_7pcw_SA <- HSE_7pcw %>% dplyr::filter(Analysis == "Surface Area")
+HSE_7pcw_SA_le <- HSE_7pcw_le %>% dplyr::filter(Analysis == "Surface Area")
+HSE_7pcw_SA_le$Region[34]="Full"
+HSE_7pcw_SA_re <- HSE_7pcw_re %>% dplyr::filter(Analysis == "Surface Area")
+HSE_7pcw_SA_re$Region[34]="Full"
+#HSE_7pcw_TH <- HSE_7pcw %>% dplyr::filter(Analysis == "Thickness")
+#HSE_7pcw_TH_le <- HSE_7pcw_le %>% dplyr::filter(Analysis == "Thickness")
+#HSE_7pcw_TH_re <- HSE_7pcw_re %>% dplyr::filter(Analysis == "Thickness")
+#enrich_max <- max(HSE_7pcw_SA$Enrichment)
+HSE_7pcw_SA_re$Enrichment = as.double(HSE_7pcw_SA_re$Enrichment)
+enrich_max <- max(HSE_7pcw_SA_re$Enrichment) #because we want all the plots on this figure to be using the same color axis
+## If the FDR-corrected pvalue is > 0.05, set the Enrichment to 0 so it's grey in the brain plot
+#HSE_7pcw_SA$Enrichment_plot <- if_else(HSE_7pcw_SA$fdr >= 0.05, true = 0, false = HSE_7pcw_SA$Enrichment)
+HSE_7pcw_SA_re$Enrichment_plot <- if_else(HSE_7pcw_SA_re$fdr >= 0.05, true = 0, false = HSE_7pcw_SA_re$Enrichment)
+#P:/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/
+
+brainplot_full(dta = HSE_7pcw_SA_re,
+               out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/partherit/plots/partherit_brainplots/l-r_globalCov/NeanDep",
+               out_suffix = "_right_ancreg_Phase3_noGC",
+               loop_over = "Annotation",
+               region_col = "Region",
+               Z_col = "Enrichment_plot",
+               analysis_col = "Analysis",
+               max_val = enrich_max,
+               low_color = "midnightblue",
+               high_color = "darkred", 
+               nonsig_color = "#BABABC")
+
+brainplot_SA(dta = HSE_7pcw_SA_re,
+             out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/partherit/plots/partherit_brainplots/l-r_globalCov/",
+             out_suffix = "_right_ancreg_Phase3_noGC",
+             loop_over = "Annotation",
+             region_col = "Region",
+             Z_col = "Enrichment_plot",
+             analysis_col = "Analysis",
+             max_val = enrich_max,
+             low_color = "midnightblue",
+             high_color = "darkred",
+             nonsig_color = "#BABABC")

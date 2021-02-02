@@ -6,7 +6,7 @@ library(tools)
 options(stringsAsFactors=FALSE);
 
 ##Output directory for annotation files
-outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/partherit/new_annot/"
+outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/partherit/new_annots/"
 
 ##Get a vector of bed file paths
 bedFiles <- Sys.glob("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/supplemental_table1/beds/*.bed")
@@ -64,7 +64,8 @@ for (i in 1:length(bedFiles)) {
       
       # outframe = cbind(outframe,as.data.frame(mcols(snps.cat))[,3:(length(categories)+2)]);
       colnames(outframe)[5] = evo_name;
-      dir.create(paste0(outputdir,evo_name),showWarnings=FALSE);
+      setwd(outputdir)
+      dir.create(paste0(outputdir,evo_name),showWarnings=T);
       gz1 = gzfile(paste0(outputdir,evo_name,"/",evo_name, ".",chr,".annot.gz"), "w")
       write.table(outframe,gz1,quote=FALSE,col.names=TRUE,row.names=FALSE,sep="\t");
       close(gz1);

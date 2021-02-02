@@ -1,7 +1,7 @@
 #!/bin/sh
 #$ -N part_herit
 #$ -cwd
-#$ -q multi15.q
+#$ -q single15.q
 #$ -S /bin/bash
 
 ftrait=$1
@@ -18,12 +18,12 @@ echo "Annot: $annot"
 echo "Output: $foutput"
 echo "Baseline: $fbaseline"
 
-python /home/gokala/ldsc/ldsc.py  \
+python /home/gokala/ldsc/ldsc.py \
 --h2 ${ftrait} \
 --out ${foutput} \
 --frqfile-chr /data/workspaces/lag/shared_spaces/Resource_DB/LDscores/Phase3/1000G_Phase3_frq/1000G.EUR.QC. \
 --overlap-annot \
---ref-ld-chr /data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MAe3ukw3_ancreg/annotations/${fannot}/${annot}.,/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MAe3ukw3_ancreg/annotations/${fbaseline}/${fbaseline}.,/data/workspaces/lag/shared_spaces/Resource_DB/LDscores/Phase3/baselineLD_v2.2/baselineLD.  \
+--ref-ld-chr /data/clusterfs/lag/users/gokala/enigma-evol/partherit/amanda_annotations/${fannot}/${annot}.,/data/clusterfs/lag/users/gokala/enigma-evol/partherit/amanda_annotations/${fbaseline}/${fbaseline}.,/data/clusterfs/lag/users/gokala/enigma-evol/partherit/baselineLD/baselineLD. \
 --w-ld-chr /data/workspaces/lag/shared_spaces/Resource_DB/LDscores/Phase3/1000G_Phase3_weights_hm3_no_MHC/weights.hm3_noMHC. \
 --print-coefficients
 

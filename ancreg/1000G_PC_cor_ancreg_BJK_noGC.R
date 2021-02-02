@@ -23,7 +23,7 @@ print(outputdir)
 #outputdir = "P:/workspaces/lg-genlang/Working/Evolution/"
 
 ##load 1000G PC effect sizes (basically an estimate population stratification for each SNP)
-f1000G="/data/clusterfs/lag/users/gokala/1kg_phase3_ns.allpop.unrel2261_eigenvec.P1to20_beta_se_pval.Rdata"
+f1000G="/data/clusterfs/lag/users/gokala/enigma-evol/1kg_phase3_ns.allpop.unrel2261_eigenvec.P1to20_beta_se_pval.Rdata"
 #"P:/workspaces/lg-genlang/Working/Evolution/1kg_phase3_ns.allpop.unrel2261_eigenvec.P1to20_beta_se_pval.Rdata"
 
 ##Block jackknife function

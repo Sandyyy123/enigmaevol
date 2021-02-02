@@ -32,8 +32,8 @@ library(plotly)
 
 
 ### Load descriptions of the brain surface and regions
-regionordering <- read.csv(here("plotting", "freesurfer_orderandcolor.csv"))
-load(here("plotting", "FreesurferRegionalObjs.Rdata"))
+regionordering <- read.csv("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/freesurfer_orderandcolor.csv")
+load("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/FreesurferRegionalObjs.Rdata")
 str(objs)
 
 
@@ -64,6 +64,7 @@ brainplot_SA <- function(dta,
 
   ## Cleaning up the names of the brain regions in the objs list, and removing the left hemisphere versions (we only need one set)
   objs <- objs[1:35]
+  #objs <- objs[1:35] - changed this bit to plot right hemisphere (1:35=left, 36:70=right)
   names(objs) <- sapply(names(objs), function(x) {
     unlist(strsplit(x, ".", fixed = TRUE))[length(unlist(strsplit(x, ".", fixed = TRUE)))]
   })

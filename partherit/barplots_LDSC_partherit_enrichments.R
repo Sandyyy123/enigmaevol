@@ -14,8 +14,8 @@ library(here)
 regionordering = read.csv(here("scripts", "1000Genomes_Phase3_Analysis", "plotting", "freesurfer_orderandcolor.csv"))
 
 
-filesGlobal = Sys.glob(here("./partherit/results_tables/*_results_FDR35.txt"))
-
+filesGlobal = Sys.glob(here("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/*_results_FDR35.txt"))
+#filesGlobal=c("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/HAR_results_FDR35.txt","/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/Sweeps_results_FDR35.txt","/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/NeanDepleted_results_FDR35.txt","/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/NeanSNPs_3col_results_FDR35.txt")
 for (i in 1:length(filesGlobal)){
   dataGlobal <- read.table(filesGlobal[i], header = TRUE, sep = "\t")
   dataGlobal$Region <- factor(dataGlobal$Region, levels = regionordering$Region)
@@ -30,8 +30,8 @@ for (i in 1:length(filesGlobal)){
          y = "Enrichment", 
          title = annot)
   pSA
-  ggsave(paste0("./partherit/plots/barplot_",annot,"_SA_MA6.svg"), width = 6, height = 3.25, units = "in")
-  ggsave(paste0("./partherit/plots/barplot_",annot,"_SA_MA6.pdf"), width = 6, height = 3.25, units = "in")
+  #ggsave(paste0("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/partherit/plots/enrichment/barplot_",annot,"_SA_MA6.svg"), width = 6, height = 3.25, units = "in")
+  ggsave(paste0("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/partherit/plots/enrichment/barplot_",annot,"_SA_MA6.pdf"), width = 6, height = 3.25, units = "in")
   }
 
 for (i in 1:length(filesGlobal)){
@@ -48,6 +48,6 @@ for (i in 1:length(filesGlobal)){
     labs(x = "Region", 
          y = "Enrichment", 
          title = annot)
-  ggsave(paste0("./partherit/plots/barplot_",annot,"_TH_MA6.svg"), width =6, height = 3.25, units = "in")
-  ggsave(paste0("./partherit/plots/barplot_",annot,"_TH_MA6.pdf"), width =6, height = 3.25, units = "in")
+  #ggsave(paste0("./partherit/plots/barplot_",annot,"_TH_MA6.svg"), width =6, height = 3.25, units = "in")
+  ggsave(paste0("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/partherit/plots/enrichment/barplot_",annot,"_TH_MA6.pdf"), width =6, height = 3.25, units = "in")
 }

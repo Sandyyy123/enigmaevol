@@ -4,18 +4,19 @@ library(gplots);
 #setwd('~/Documents/papers/ENIGMA-Evolution/RegionalPlottingFreesurfer');
 
 ##Load in all the Freesurfer surfaces
-freesurfer="/data/clusterfs/lag/users/gokala/enigma-evol/sds/FreesurferRegionalObjs.Rdata"
-load("FreesurferRegionalObjs.Rdata")
+#freesurfer="/data/clusterfs/lag/users/gokala/enigma-evol/sds/FreesurferRegionalObjs.Rdata"
+load("/data/clusterfs/lag/users/gokala/enigma-evol/sds/FreesurferRegionalObjs.Rdata")
 
 ##Correlations with SDS scores at different thresholds
 #Set colorbar values
 minZ = -0.0165;
 maxZ = 0.0165;
     
-fcorvals = (paste0("/data/clusterfs/lag/users/gokala/enigma-evol/l-r/sds/SDS_bjk_non-ancreg_1kblocks.csv"));
+fcorvals = ("/data/clusterfs/lag/users/gokala/enigma-evol/sds/SDS_bjk_ancreg_1kblocks.csv")
 corvals = read.csv(fcorvals);
 thisSA = corvals[grep("surf",corvals$X),];
-thisSA$region = sapply(as.character(thisSA$X),function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]});
+thisSA$region = paste(sapply(as.character(thisSA$X),function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]}),sapply(as.character(thisSA$X),function (x) {unlist(strsplit(x,"_",fixed=TRUE))[3]}),sep="_")
+#thisSA = thisSA[-grep("_no",thisSA$region),]
 thisTH = corvals[grep("thick",corvals$X),];
 thisTH$region = sapply(as.character(thisTH$X),function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]});
 
@@ -35,12 +36,12 @@ ax = list(
   showgrid = FALSE
 )
 
-    thisSA$padj = p.adjust(thisSA$BJK_ESTIM_PVAL,"BH");
-    thisSA$BJK_ESTIM_AVE[which(thisSA$padj > 0.05)] = 0;
+    thisSA$padj = p.adjust(thisSA$BJK_ESTIM_PVAL,"BH")
+    thisSA$BJK_ESTIM_AVE[which(thisSA$padj > 0.05)] = 0
     ##thisSA$clumpedcorestimate[which(thisSA$padj > 0.05)] = 0;
     ##Make sure the order of each corresponds
-    inds = match(names(objs),thisSA$region);
-    thisSA = thisSA[inds,];
+    inds = match(names(objs),thisSA$region)
+    thisSA = thisSA[inds,]
     #maxZ = max(thisSA$clumpedcorestimate,na.rm=TRUE);
     #minZ = min(thisSA$clumpedcorestimate,na.rm=TRUE);
     ##Ensure the color scale is symmetrical from positive to negative

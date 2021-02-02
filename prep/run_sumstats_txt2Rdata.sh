@@ -1,13 +1,12 @@
 #!/bin/bash
-#$ -N run_sumstats_txt2Rdata
+#$ -N convert_txt2Rdata
 #$ -cwd
 #$ -q single.q
 #$ -S /bin/bash
 
 #-----Convert sumstats.txt to sumstats.Rdata-----
 
-# Convert txt formatted summary statisctics files to Rdata for downstream analysis.
-# Rdata files will be used by PC_corBJK_noGC.R script.
+# Convert txt formatted summary statistics files to Rdata for downstream analysis.
 
 #-----
 echo "Starting to convert sumstats from txt to Rdata"
