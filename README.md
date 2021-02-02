@@ -28,10 +28,10 @@ Munge non-ancestry regressed `.txt` files to reformat and prepare files for the 
 ## 2. Assessing the impact of population stratification on summary statistics and Ancestry Regression
 
 **a. Assessment Prior to ancestry regression:**  
-    a1. Run the first correlation test between your summary statistics and 1000G phase 3 PC loadings (first 20 PCs).  
+    **a1.** Run the first correlation test between your summary statistics and 1000G phase 3 PC loadings (first 20 PCs).  
         Use `1000G_PC_cor_BJK_noGC.R` and `run_1000G_PC_cor_BJK_noGC.sh`.  
         Plot your results using `plot1000G_PC_cor_noGC_BJK.R` and `run_plot1000G_PC_cor_noGC_BJK.sh` (Fig.1a from Tilot et al., 2019).  
-    a2. Compute LDSC intercepts prior to ancestry regression for each brain region.
+    **a2.** Compute LDSC intercepts prior to ancestry regression for each brain region.
         Run `ldsc.sh`.
     
 **b. Ancestry Regression - correcting for population stratification:**  
@@ -39,11 +39,11 @@ Munge non-ancestry regressed `.txt` files to reformat and prepare files for the 
 Use `AncestryRegression_noGC.R` and `run_AncestryRegression_noGC.sh`.  
   
 **c. Assessment After ancestry regression:**  
-    c1. Run the second correlation test between your summary statistics and 1000G phase 3 PC loadings (first 20 PCs).  
+    **c1.** Run the second correlation test between your summary statistics and 1000G phase 3 PC loadings (first 20 PCs).  
         Use `1000G_PC_cor_ancreg_BJK_noGC.R` and `run_1000G_PC_cor_ancreg_BJK_noGC.sh`.  
         Plot your results using `plot1000G_PC_cor_ancreg_noGC_BJK.R` and `run_plot1000G_PC_cor_ancreg_noGC_BJK.sh`  (Fig.1b from Tilot et al., 2019).  
-    c2. Convert ancestry regressed summary statistics to `.txt` format using `run_sumstats_Rdata2txt.sh` and `sumstats_Rdata2txt.R`.
-    c3. Compute LDSC intercepts after ancestry regression for each brain region.
+    **c2.** Convert ancestry regressed summary statistics to `.txt` format using `run_sumstats_Rdata2txt.sh` and `sumstats_Rdata2txt.R`.
+    **c3.** Compute LDSC intercepts after ancestry regression for each brain region.
         Change `inDir` and `outDir` variables to the folder containing ancestry regressed in `ldsc.sh` and run.
         Extract LDSC intercept values from LDSC output with `Extract_values_LDSC_logs.R`.
         Plot LDSC intercept comparison (before/after ancestry regression) using `LDSC_ancreg_before_after.R`.
