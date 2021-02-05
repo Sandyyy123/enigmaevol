@@ -55,4 +55,4 @@ Run a correalation analysis between SDS values and GWAS effect sizes using `run_
 Plot results with `plotSDS_ancreg1KGPphase3_noGC_MA6.R`.
 
 ## Partitioned Heritability
-
+If you will run partitioned heritability by using annotation, make a list of your annotations with 2 columns (`annots` and `baseline`). with your annotations and save as annots_and_baselines.csv
