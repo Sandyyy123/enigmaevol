@@ -36,6 +36,8 @@ rep_1_partherit=rep_1_partherit[rep_1_partherit$Analysis=="Surface Area",]
 merged3=merge(e3_partherit,rep_1_partherit,by="Region")
 merged3=merged3[,c("Region","Prop._h2.x","Prop._h2_std_error.x","significant.x","Prop._h2.y","Prop._h2_std_error.y","significant.y")]
 
+###################################################################
+
 ##Make barplots of correlation estimates for each
 # e3 plot
 corind_e3 = grep("BJK_cor",colnames(e3))
@@ -72,6 +74,8 @@ text(x_rep_1[bonfsigind_rep_1],col="black",0.040,"*")
 text(x_rep_1[nomsigind_rep_1],col="black",0.040,"o")
 dev.off()
 
+### Same plot for ancestry regressed sumstats
+
 # e3 plot
 corind_e3_ancreg = grep("BJK_cor",colnames(e3_ancreg))
 pind_e3_ancreg = grep("BJK_P",colnames(e3_ancreg))
@@ -102,6 +106,8 @@ barplot(as.matrix(rep_1_ancreg[1,corind_rep_1_ancreg]),col="black",ylim=c(-0.05,
 arrows(x_rep_1_ancreg,y0_rep_1_ancreg,x_rep_1_ancreg,y1_rep_1_ancreg,col="black",angle=90,length=0)
 dev.off()
 
+###################################################################
+
 # Run a correlation test btw. E3 and replication correlation values and see if they are significantly different
 merged=rbind(e3,rep_1)[,corind_rep_1]
 row.names(merged)=e3$X
@@ -114,6 +120,8 @@ cocor(~Mean_Full_SurfArea + SurfArea_global_total | Mean_Full_SurfArea + SurfAre
       alternative = "two.sided", test = "all",
       na.action = getOption("na.action"), alpha = 0.05, conf.level = 0.95,
       null.value = 0, return.htest = FALSE)
+
+###################################################################
 
 ## LDSC comparison plots
 e3_ldsc = e3_ldsc[c(which(e3_ldsc$Region=="Full"),which(e3_ldsc$Region!="Full")),] # move Full to the top
@@ -134,6 +142,8 @@ ggplot(merged2, aes(fct_rev(reorder(Region,my.order)), LDSC_intercept,color=Anc_
                                                color = "black", size=0.5) +
   theme(plot.title = element_text(hjust = 0.5))
 ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/plots/e3_rep_LDSC_intercepts_before_after_ancreg_w_errorbars_surfaceArea_v2.pdf", width = 7, height = 9, unit = "in")
+
+###################################################################
 
 ## Partitioned heritability comparison plots
 regionordering <- read.csv("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/freesurfer_orderandcolor.csv")
