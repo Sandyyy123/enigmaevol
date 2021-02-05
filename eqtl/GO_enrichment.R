@@ -6,32 +6,40 @@ library(GenomicRanges);
 library(biomaRt);
 
 ##BED file containing HGE_7PCW, as well as other annotations
-fannot = "allAnnots_MAe3ukw3_shortnames.bed";
+fannot = "/data/clusterfs/lag/users/gokala/enigma-evol/eqtl/all_EVO_annots_MAe3ukw3.bed"
+#allAnnots_MAe3ukw3_shortnames.bed
+
 ##eQTL data downloaded from PsychENCODE
-feqtl = "DER-08a_hg19_eQTL.significant.txt";
+feqtl = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/DER-08a_hg19_eQTL.significant.txt"
+
 ##SNP information corresponding to eQTL data
-fsnp = "SNP_Information_Table_with_Alleles.txt";
+#fsnp = "SNP_Information_Table_with_Alleles.txt";
+
 ##ancestry regressed gwas summary stats
-fGWASsumstats = "/ifs/loni/faculty/dhibar/ENIGMA3/MA6/evolution/1000Gphase3_PC_cor/AncestryRegressionData_noGC/GWASfiles.txt"
+fGWASsumstats = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/replication_v1/SA_sumstats_rdata_list.txt"
+fGWASsumstats_txt = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/replication_v1/txt_sumstats/SA_sumstats_txt_list.txt"
+
 ##Clumped ancestry regressed data
-fclumpdir = "/ifs/loni/faculty/dhibar/ENIGMA3/MA6/evolution/E3ancreg1KGP3_noGC_CLUMPED/CLUMPED5e-8";
+fclumpdir = "/data/clusterfs/lag/users/gokala/enigma-evol/eqtl/clumped_ancestry_regressed_sumstats"
 
 ##Match the Rdata file locations of sumstats, text file sumstats
 GWASsumstats=read.table(fGWASsumstats, header=FALSE)$V1
+GWASsumstats_txt=read.table(fGWASsumstats_txt, header=FALSE)$V1
 ##Parse to get trait name
-tmpname = sapply(GWASsumstats,function (x) {unlist(strsplit(x,"/",fixed=TRUE))[11]});
-phenoname = substr(tmpname,1,nchar(tmpname)-13);
-allfileloc = data.frame(rdatafile=GWASsumstats,clumpfile=paste0(fclumpdir,"/",phenoname,".clumped"));
+tmpname = sapply(GWASsumstats,function (x) {unlist(strsplit(x,"/",fixed=TRUE))[10]})
+tmpname_txt = sapply(GWASsumstats_txt,function (x) {unlist(strsplit(x,"/",fixed=TRUE))[11]})
+phenoname = sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]})
+allfileloc = data.frame(rdatafile=GWASsumstats,clumpfile=paste0(fclumpdir,"/",tmpname_txt,".clumped"))
 
 ####################
 ##Full surface area
 ##Start by getting all the clumped SNPs only for full surface area
-fullsurfind = which(phenoname=="Mean_Full_SurfArea");
+fullsurfind = which(phenoname=="global");
 clump = read.table(allfileloc$clumpfile[fullsurfind],header=TRUE);
 ##Loop over all SNPs
 for (i in 1:nrow(clump)) {
     ##Find all SNPs in LD (r2>0.6) with each clumped SNP
-    system(paste0("/ifshome/smedland/bin/plink1.9 --bfile /ifshome/smedland/ARCHIEVE/refs/ALL.chr_merged.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes --r2  --ld-window-kb 10000 --ld-window 2000 --ld-window-r2 0.6 --ld-snp ",clump$SNP[i]," --out tmpld"));
+    system(paste0("module load plink/1.9b6 plink --bfile /data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/plink/1KG_phase3_GRCh37_EUR_nonFIN_allchr --r2  --ld-window-kb 10000 --ld-window 2000 --ld-window-r2 0.6 --ld-snp ",clump$SNP[i]," --out tmpld"));
     ##Read in the LD calculated from plink
     LD = read.table('tmpld.ld',header=TRUE);
     ##Turn into a genomic ranges object
