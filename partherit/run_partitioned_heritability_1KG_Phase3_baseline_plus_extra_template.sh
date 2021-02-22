@@ -18,6 +18,8 @@ echo "Annot: $annot"
 echo "Output: $foutput"
 echo "Baseline: $fbaseline"
 
+module load python/2.7.15
+
 python /home/gokala/ldsc/ldsc.py \
 --h2 ${ftrait} \
 --out ${foutput} \

@@ -1,0 +1,73 @@
+#!/bin/bash
+#setting the paths to bedtools:
+PATH=/home/ivoste/bedtools/bedtools2/bin/:$PATH
+
+#setting directories:
+delsDir=/data/corpora/MPI_workspace/lag/lg-ngs/working/SYD_analysis_Ivo/bedtools/BICseq.deletions
+dupesDir=/data/corpora/MPI_workspace/lag/lg-ngs/working/SYD_analysis_Ivo/bedtools/BICseq.duplications
+onekgenomeDir="/home/ivoste/1kgenome.data"
+gonlDir=/home/ivoste/GO-NL.data
+
+
+# head -n 137 $gonlDir/20161013_GoNL_AF_genotyped_SVs.vcf > $gonlDir/20161013_GoNL_AF_genotyped_SVs_duplications.vcf
+# grep SVTYPE=DUP $gonlDir/20161013_GoNL_AF_genotyped_SVs.vcf >> $gonlDir/20161013_GoNL_AF_genotyped_SVs_duplications.vcf
+
+# head -n 137 $gonlDir/20161013_GoNL_AF_genotyped_SVs.vcf > $gonlDir/20161013_GoNL_AF_genotyped_SVs_deletions.vcf
+# grep SVTYPE=DEL $gonlDir/20161013_GoNL_AF_genotyped_SVs.vcf >> $gonlDir/20161013_GoNL_AF_genotyped_SVs_deletions.vcf
+
+# head -n 123 $gonlDir/20161013_GoNL_AF_nongenotyped_SVs.vcf > $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_deletions.vcf
+# grep SVTYPE=DEL $gonlDir/20161013_GoNL_AF_nongenotyped_SVs.vcf >> $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_deletions.vcf
+
+# head -n 123 $gonlDir/20161013_GoNL_AF_nongenotyped_SVs.vcf > $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_duplications.vcf
+# grep SVTYPE=DUP $gonlDir/20161013_GoNL_AF_nongenotyped_SVs.vcf >> $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_duplications.vcf
+
+# head -n 72 $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf > $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.deletions.vcf
+# grep SVTYPE=DEL $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf >> $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.deletions.vcf
+
+# head -n 72 $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf > $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.duplications.vcf
+# grep SVTYPE=DUP $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf >> $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.duplications.vcf
+
+for s in SYD06 SYD10 SYD11 SYD12 SYD13; do
+	for l in L0.5 L1 L2 L4 L5; do
+		bedtools intersect -a $delsDir/SYD01$l"deletions.merged.sorted.bed" -b $delsDir/$s$l"deletions.merged.sorted.bed" -f 0.50 -r -wo > $delsDir/Intersect.calls/SYD01vs$s$l"deletions.merged.sorted.bed"
+		bedtools intersect -a $dupesDir/SYD01$l"duplications.merged.sorted.bed" -b $dupesDir/$s$l"duplications.merged.sorted.bed" -f 0.50 -r -wo > $dupesDir/Intersect.calls/SYD01vs$s$l"duplications.merged.sorted.bed"
+		cat $dupesDir/Intersect.calls/SYD01vs$s$l"duplications.merged.sorted.bed" | sed 's/chr//' | bedtools intersect -a stdin -b $gonlDir/20161013_GoNL_AF_genotyped_SVs_duplications.vcf $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_duplications.vcf $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.duplications.vcf -f 0.2 -r -c > $dupesDir/Intersect.calls/SYD01vs$s$l"vsGoNL.1KGP.duplications.merged.sorted.bed"
+		cat $delsDir/Intersect.calls/SYD01vs$s$l"deletions.merged.sorted.bed" | sed 's/chr//' | bedtools intersect -a stdin -b $gonlDir/20161013_GoNL_AF_genotyped_SVs_deletions.vcf $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_deletions.vcf $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.deletions.vcf -f 0.2 -r -c > $delsDir/Intersect.calls/SYD01vs$s$l"vsGoNL.1KGP.deletions.merged.sorted.bed"
+	done
+done
+
+for s in SYD10 SYD11 SYD12 SYD13; do
+	for l in L0.5 L1 L2 L4 L5; do
+		bedtools intersect -a $delsDir/SYD06$l"deletions.merged.sorted.bed" -b $delsDir/$s$l"deletions.merged.sorted.bed" -f 0.50 -r -wo > $delsDir/Intersect.calls/SYD06vs$s$l"deletions.merged.sorted.bed"
+		bedtools intersect -a $dupesDir/SYD06$l"duplications.merged.sorted.bed" -b $dupesDir/$s$l"duplications.merged.sorted.bed" -f 0.50 -r -wo > $dupesDir/Intersect.calls/SYD06vs$s$l"duplications.merged.sorted.bed"
+		cat $dupesDir/Intersect.calls/SYD06vs$s$l"duplications.merged.sorted.bed" | sed 's/chr//' | bedtools intersect -a stdin -b $gonlDir/20161013_GoNL_AF_genotyped_SVs_duplications.vcf $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_duplications.vcf $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.duplications.vcf -f 0.2 -r -c > $dupesDir/Intersect.calls/SYD06vs$s$l"vsGoNL.1KGP.duplications.merged.sorted.bed"
+		cat $delsDir/Intersect.calls/SYD06vs$s$l"deletions.merged.sorted.bed" | sed 's/chr//' | bedtools intersect -a stdin -b $gonlDir/20161013_GoNL_AF_genotyped_SVs_deletions.vcf $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_deletions.vcf $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.deletions.vcf -f 0.2 -r -c > $delsDir/Intersect.calls/SYD06vs$s$l"vsGoNL.1KGP.deletions.merged.sorted.bed"
+	done
+done
+
+for s in SYD11 SYD12 SYD13; do
+	for l in L0.5 L1 L2 L4 L5; do
+		bedtools intersect -a $delsDir/SYD10$l"deletions.merged.sorted.bed" -b $delsDir/$s$l"deletions.merged.sorted.bed" -f 0.50 -r -wo > $delsDir/Intersect.calls/SYD10vs$s$l"deletions.merged.sorted.bed"
+		bedtools intersect -a $dupesDir/SYD10$l"duplications.merged.sorted.bed" -b $dupesDir/$s$l"duplications.merged.sorted.bed" -f 0.50 -r -wo > $dupesDir/Intersect.calls/SYD10vs$s$l"duplications.merged.sorted.bed"
+		cat $dupesDir/Intersect.calls/SYD10vs$s$l"duplications.merged.sorted.bed" | sed 's/chr//' | bedtools intersect -a stdin -b $gonlDir/20161013_GoNL_AF_genotyped_SVs_duplications.vcf $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_duplications.vcf $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.duplications.vcf -f 0.2 -r -c > $dupesDir/Intersect.calls/SYD10vs$s$l"vsGoNL.1KGP.duplications.merged.sorted.bed"
+		cat $delsDir/Intersect.calls/SYD10vs$s$l"deletions.merged.sorted.bed" | sed 's/chr//' | bedtools intersect -a stdin -b $gonlDir/20161013_GoNL_AF_genotyped_SVs_deletions.vcf $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_deletions.vcf $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.deletions.vcf -f 0.2 -r -c > $delsDir/Intersect.calls/SYD10vs$s$l"vsGoNL.1KGP.deletions.merged.sorted.bed"
+	done
+done
+
+for s in SYD12 SYD13; do
+	for l in L0.5 L1 L2 L4 L5; do
+		bedtools intersect -a $delsDir/SYD11$l"deletions.merged.sorted.bed" -b $delsDir/$s$l"deletions.merged.sorted.bed" -f 0.50 -r -wo > $delsDir/Intersect.calls/SYD11vs$s$l"deletions.merged.sorted.bed"
+		bedtools intersect -a $dupesDir/SYD11$l"duplications.merged.sorted.bed" -b $dupesDir/$s$l"duplications.merged.sorted.bed" -f 0.50 -r -wo > $dupesDir/Intersect.calls/SYD11vs$s$l"duplications.merged.sorted.bed"
+		cat $dupesDir/Intersect.calls/SYD11vs$s$l"duplications.merged.sorted.bed" | sed 's/chr//' | bedtools intersect -a stdin -b $gonlDir/20161013_GoNL_AF_genotyped_SVs_duplications.vcf $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_duplications.vcf $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.duplications.vcf -f 0.2 -r -c > $dupesDir/Intersect.calls/SYD11vs$s$l"vsGoNL.1KGP.duplications.merged.sorted.bed"
+		cat $delsDir/Intersect.calls/SYD11vs$s$l"deletions.merged.sorted.bed" | sed 's/chr//' | bedtools intersect -a stdin -b $gonlDir/20161013_GoNL_AF_genotyped_SVs_deletions.vcf $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_deletions.vcf $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.deletions.vcf -f 0.2 -r -c > $delsDir/Intersect.calls/SYD11vs$s$l"vsGoNL.1KGP.deletions.merged.sorted.bed"
+	done
+done
+
+for s in SYD13; do
+	for l in L0.5 L1 L2 L4 L5; do
+		bedtools intersect -a $delsDir/SYD12$l"deletions.merged.sorted.bed" -b $delsDir/$s$l"deletions.merged.sorted.bed" -f 0.50 -r -wo > $delsDir/Intersect.calls/SYD12vs$s$l"deletions.merged.sorted.bed"
+		bedtools intersect -a $dupesDir/SYD12$l"duplications.merged.sorted.bed" -b $dupesDir/$s$l"duplications.merged.sorted.bed" -f 0.50 -r -wo > $dupesDir/Intersect.calls/SYD12vs$s$l"duplications.merged.sorted.bed"
+		cat $dupesDir/Intersect.calls/SYD12vs$s$l"duplications.merged.sorted.bed" | sed 's/chr//' | bedtools intersect -a stdin -b $gonlDir/20161013_GoNL_AF_genotyped_SVs_duplications.vcf $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_duplications.vcf $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.duplications.vcf -f 0.2 -r -c > $dupesDir/Intersect.calls/SYD12vs$s$l"vsGoNL.1KGP.duplications.merged.sorted.bed"
+		cat $delsDir/Intersect.calls/SYD12vs$s$l"deletions.merged.sorted.bed" | sed 's/chr//' | bedtools intersect -a stdin -b $gonlDir/20161013_GoNL_AF_genotyped_SVs_deletions.vcf $gonlDir/20161013_GoNL_AF_nongenotyped_SVs_deletions.vcf $onekgenomeDir/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.deletions.vcf -f 0.2 -r -c > $delsDir/Intersect.calls/SYD12vs$s$l"vsGoNL.1KGP.deletions.merged.sorted.bed"
+	done
+done

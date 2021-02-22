@@ -23,6 +23,7 @@ When you click the **Knit** button a document will be generated that includes bo
 ```{r read & clean data, echo=FALSE}
 # read the results table of HGE 7th PCW
 enrichment_scores = read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_with_global/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
+enrichment_scores2 = read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_hemi_spec_glob/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
 
 # fix region names, get rid of blanks
 enrichment_scores$Region=gsub(" re _", "_re", enrichment_scores$Region)
@@ -56,7 +57,7 @@ p2 = ggscatter(for_scatter, x = "right_prop", y = "left_prop",  color = "sienna4
           add = "reg.line", cor.coef = TRUE, cor.method = "pearson",
           xlab = "Right Hemisphere", ylab = "Left Hemisphere", title = "Proportion of heritability") + theme_bw()
 plot_grid(p1,p2,labels=c('A','B'),label_size = 12)
-ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/enrichment/left-right_enrichment_comparison_color2.pdf",height = 7,width = 7)
+ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/enrichment/left-right_enrichment_scatter.pdf",height = 4,width = 7)
 ```
 
 ## Bar plot
@@ -137,8 +138,8 @@ bargraph_prop = ggplot(data = for_bar2,aes(x = Region,
            labs(x = "Region", y = expression("Heritability Proportion"),
            title = "Proportion of heritability") + 
            scale_fill_manual(values=c("yellow4","sienna4"),labels=c("Left Hemisphere","Right Hemisphere")) +
-           geom_text(data = label.df.left2,aes(x=Region, y=Proportion + 0.05), label = "*  ", color="yellow4") +
-           geom_text(data = label.df.right2,aes(x=Region, y=Proportion + 0.05), label = "  *",color="sienna4") +
+           geom_text(data = label.df.left2,aes(x=Region, y=Proportion + 0.05), label = "* ", color="yellow4") +
+           geom_text(data = label.df.right2,aes(x=Region, y=Proportion + 0.05), label = " *",color="sienna4") +
            geom_segment(aes(x=for_bar$Region,y=-Inf,xend=for_bar$Region,yend=0), linetype=3, colour="light gray") + theme(legend.position="bottom")
 
 #ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/left_right_partherit_proportion_color2.pdf", width = 9, height = 6, unit = "in")
@@ -153,4 +154,4 @@ ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma
 ```{r overlap analysis, echo=FALSE}
 
 ```
-sessionInfo(package = NULL)
+sessionInfo()

@@ -3,51 +3,85 @@
 # Estimating heritability, genetic correlation and the LD Score Regression Intercept
 # ldsc function is from github.com/bulik/ldsc
 # For interpreting results, check the tutorial at github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation
+# This script takes 2 parameters: A csv file with "Annotation" and "Baseline" columns and a text file list of munged sumstats.
 
 #-----Variables-----
 # $inDir - ancestry regressed + munged summary statistics directory
-# $iv - LD Score files to use as the independent variable in the LD Score regression
-# $rw - LD Scores to use for the regression weights
-# For this analysis, same file is used as iv and rw -> eur_w_ld_chr
 
-inDir="/data/clusterfs/lag/users/gokala/enigma-evol/sumstats/munged/replication_v1/"
-outDir="/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/nonancreg_intercepts/replication_v1/"
-iv_rw="/data/workspaces/lag/shared_spaces/Resource_DB/LDscores/eur_w_ld_chr/"
-mungedSumstatsList="/data/clusterfs/lag/users/gokala/enigma-evol/sumstats/munged/replication_v1/munged_sumstat_list.txt"
+annotFile=$1
+mungedSumstats=$2
+firstLine=$(head -n 1 $mungedSumstats)
+inDir=$(dirname $firstLine)
+outDir="${inDir}/results/"
 
 #-----
-mkdir "${inDir}scripts"
+mkdir "${inDir}/scripts"
+mkdir "${inDir}/results"
+mkdir "${inDir}/shelloutput/"
 
 echo $inDir
 echo $outDir
-echo $iv_rw
 echo "Starting to compute partitioned heritability"
 
-#module load python/3.7.2 \
+while read a; do
+   echo $a
+   tmp_file=$(basename "$a")
+   echo $tmp_file
+   tmp_pheno="$(cut -d'_' -f1,2 <<<"$tmp_file")"
+   echo $tmp_pheno
+   #tmp_output="${outDir}${annot}"
+   
+   sed 1d $annotFile | while IFS="	" read -r col1 col2; do
 
-while read line; do
-   echo $line
-   tmp_base_name=$(basename "$line")
-   echo $tmp_base_name
-   trait="$(cut -d'_' -f1,2 <<<"$tmp_base_name")"
-   echo $pheno_name
-   output="${outDir}${trait}"
-   tmp_run_file="${inDir}scripts/${trait}.sh"
-   echo '#!/bin/sh
-   #$ -N partherit
-   #$ -cwd
-   #$ -q multi15.q
-   #$ -S /bin/bash
+	   annot=$col1
+	   baseline=$col2
+	   shellFile="${inDir}/scripts/${annot}_${tmp_pheno}.sh"
+	   logFile="${inDir}/shelloutput/${annot}_${tmp_pheno}.out"
+	   mkdir "${outDir}${annot}"
+	   tmp_output="${outDir}${annot}/${tmp_file}"
 
-   /data/clusterfs/lag/users/gokala/enigma-evol/partherit/run_partitioned_heritability_1KG_Phase3_baseline_template.sh '$tmp_base_name' '$annot' '$outDir'' > tmp_run_file
-   chmod a+x $tmp_run_file
-   echo "Created the script for cluster ->  submitting ${pheno_name} to the Grid"
-   qsub -wd "${inDir}scripts" $tmp_run_file
-done < $mungedSumstatsList
+	   echo '************************************************'
+	   echo $tmp_pheno
+	   echo $annot
+	   echo $baseline
+	   echo '************************************************'
+	   
+	   if [ $baseline == "baseline" ]
+	   then
+	   
+	   echo '#!/bin/sh
+#$ -N partherit
+#$ -cwd
+#$ -q multi15.q
+#$ -S /bin/bash
+
+/data/clusterfs/lag/users/gokala/enigma-evol/partherit/run_partitioned_heritability_1KG_Phase3_baseline_template.sh '$a' '$annot' '$tmp_output'' > $shellFile
+   	
+	   chmod a+x $shellFile
+	   echo "Created the script for cluster ->  submitting ${tmp_pheno} to the Grid"
+	   qsub -wd "${inDir}/scripts" $shellFile
+	   qsub -o $logFile -j y $shellFile
+	   
+   	   else
+	   
+	   echo '#$ -N partherit
+#$ -cwd
+#$ -q multi15.q
+#$ -S /bin/bash
+
+/data/clusterfs/lag/users/gokala/enigma-evol/partherit/run_partitioned_heritability_1KG_Phase3_baseline_plus_extra_template.sh '$a' '$annot' '$tmp_output' '$baseline'' > $shellFile
+	   
+	   chmod a+x $shellFile
+	   echo "Created the script for cluster ->  submitting ${tmp_pheno} to the Grid"
+	   qsub -wd "${inDir}scripts" $shellFile
+	   qsub -o $logFile -j y $shellFile
+
+	   fi
+
+   done < $annotFile;
+
+done < $mungedSumstats
 
 echo "Done!"
 
 #-----
-
-#!/bin/sh \n"+"#$ -N partherit \n"+"#$ -cwd \n"+"#$ -q multi15.q \n"+"#$ -S /bin/bash \n"+mainDir+"run_partitioned_heritability_1KG_Phase3_baseline_plus_extra_template.sh "+E3MA+" "+annot+" "+outDir+baseE3MA+" "+baseline+"\" > "+shellFile
-
