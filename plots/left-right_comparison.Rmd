@@ -137,7 +137,7 @@ bargraph_prop = ggplot(data = for_bar2,aes(x = Region,
            theme(legend.title=element_blank(),axis.text.x = element_text(angle = 45, hjust = 1)) +
            labs(x = "Region", y = expression("Heritability Proportion"),
            title = "Proportion of heritability") + 
-           scale_fill_manual(values=c("yellow4","sienna4"),labels=c("Left Hemisphere","Right Hemisphere")) +
+           scale_fill_manual(values=c("yellow4","sienna4"),labels=c("Right Hemisphere","Left Hemisphere")) +
            geom_text(data = label.df.left2,aes(x=Region, y=Proportion + 0.05), label = "* ", color="yellow4") +
            geom_text(data = label.df.right2,aes(x=Region, y=Proportion + 0.05), label = " *",color="sienna4") +
            geom_segment(aes(x=for_bar$Region,y=-Inf,xend=for_bar$Region,yend=0), linetype=3, colour="light gray") + theme(legend.position="bottom")
