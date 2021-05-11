@@ -1,0 +1,223 @@
+---
+title: "Cortical Surface Area Evolution"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors=FALSE)
+library(knitr)
+library(GenomicRanges)
+library(rtracklayer)
+library(data.table)
+library(kableExtra)
+library(magrittr)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(ggpubr)
+library(cowplot)
+```
+
+## a. Partitioned heritability results of filtered summary statistics
+
+UKB White British subset hemisphere-averaged GWAS summary statistics are filtered based on baseline model SNPs. Only SNPs that are present in the baseline are kept in the summary statistics, rest is filtered out. Then partitioned heritability analysis was re-done. Based on the genomic regions in the baseline model, 123,438 SNPs are filtered out from each summary statistics file.
+
+Here, the reasoning was to see if we still have negative heritability results if we filter out SNPs that are not present in the baseline model.
+
+In the end, Full Surface Area Heritability Enrichment and Proportion in Human Gained Enhancers active at 7th post-conception week are indeed converted to positive from negative heritability values. However, 2 other regions with negative heritability kept their direction after filtering. Finally, Heritability of Fusiform surface area is converted to negative, whereas it was positive prior to baseline filtering.
+
+***Plot is shown in the second page.***
+
+```{r filter sumstats, echo=FALSE, eval=FALSE}
+# Code to filter summary statistics based on baseline model
+
+baseline_bed = read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/beds/allbed/all.bed")
+baseline_bed_gr = makeGRangesFromDataFrame(baseline_bed, seqnames.field = "V1", start.field = "V2", end.field = "V3")
+
+sumstats = list.files("/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/replication_v1", pattern = "surfaceDK", full.names = T)
+
+outDir = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/baseline_subset/replication_v1/"
+
+for (i in sumstats) {
+
+    load(i) # load Rdata summary statistics
+    subset = subsetByOverlaps(mergedGR, baseline_bed_gr) # subset summary statistics based on baseline bed file
+    tmp_sumstat = mcols(subset) # convert Granges object to a data frame
+    colnames(tmp_sumstat)[c(2,3,10)] = c("A1", "A2", "CHR") # correct column names A1.x, A2.x, CHR.y
+    write.table(tmp_sumstat,paste0(outDir,sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(i)),".txt"), quote = F)
+    
+    print(i)
+    print(paste0(length(mergedGR)-length(subset)," SNPs are filtered out based on the baseline"))
+
+}
+
+```
+
+```{r comparison plots, echo=FALSE, fig.height=8,fig.width=8, warning=FALSE, fig.cap='Comparison of cortical surface area heritability before and after baseline filtering.'}
+# read in partitioned heritability results
+rep1 = read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/replication_v1/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
+baselineFiltered = read.table("/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/baseline_subset/replication_v1/munged/results_tables/HSE_7pcw_active_merged_results_FDR34.txt",header=T,sep="\t")
+
+baselineFiltered$Region=gsub("global", "Full", baselineFiltered$Region)
+
+rep1 = rep1[rep1$Analysis=="Surface Area",]
+baselineFiltered = baselineFiltered[baselineFiltered$Analysis=="Surface Area",]
+
+# merge old and new partitioned heritability results
+old_and_new = data.frame(Region = rep1$Region, rep1 = rep1$Enrichment, baselineFiltered = baselineFiltered$Enrichment, rep1_se =  rep1$Enrichment_std_error, baselineFiltered_se = baselineFiltered$Enrichment_std_error, rep1_prop = rep1$Prop._h2, baselineFiltered_prop = baselineFiltered$Prop._h2, rep1_prop_se =  rep1$Prop._h2_std_error, baselineFiltered_prop_se = baselineFiltered$Prop._h2_std_error, rep1_sig=rep1$significant,baselineFiltered_sig=baselineFiltered$significant)
+
+for_bar = old_and_new[,c("Region","rep1","baselineFiltered")] %>% 
+  gather(Dataset, Enrichment, -Region) %>%
+  mutate(Region = factor(Region)) %>%
+  arrange(Region)
+
+stars = old_and_new[,c("Region","rep1_sig","baselineFiltered_sig")] %>% 
+  gather(Dataset, Significance, -Region) %>%
+  mutate(Region = factor(Region)) %>%
+  arrange(Region)
+
+se = old_and_new[,c("Region","rep1_se","baselineFiltered_se")] %>% 
+  gather(Dataset, SE, -Region) %>%
+  mutate(Region = factor(Region)) %>%
+  arrange(Region)
+
+for_bar$Significance = stars$Significance
+for_bar$SE = se$SE
+
+regionordering <- read.csv("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/freesurfer_orderandcolor.csv")
+for_bar$Region = factor(for_bar$Region, levels = regionordering$Region)
+for_bar = for_bar[c(which(for_bar$Region=="Full"),which(for_bar$Region!="Full")),] # move Full to the top
+
+label.df.rep1 = for_bar[for_bar$Significance=="Yes"&for_bar$Dataset=="rep1",]
+label.df.baselineFiltered = for_bar[for_bar$Significance=="Yes"&for_bar$Dataset=="baselineFiltered",]
+
+##### Bar plot for heritability enrichment #####
+
+bargraph_enrichment = ggplot(data = for_bar,aes(x = Region,
+                                     y = Enrichment,
+                                     fill = Dataset)) +
+           geom_bar(stat = "identity", position = position_dodge()) +
+           geom_errorbar(aes(ymin=Enrichment-SE, ymax=Enrichment+SE),width=0.2,
+                         position = position_dodge(width = 0.9)) +
+           theme_classic() +
+           theme(legend.title=element_blank(),axis.text.x = element_text(angle = 45, hjust = 1)) +
+           labs(y = expression("Heritability Enrichment"),
+           title = "Enrichment scores") + 
+           scale_fill_manual(values=c("yellow4","sienna4")) +
+           geom_text(data = label.df.rep1,aes(x=Region, y=Enrichment + 5), label = "*  ", color="yellow4") +
+           geom_text(data = label.df.baselineFiltered,aes(x=Region, y=Enrichment + 5), label = "  *",color="sienna4") +
+           geom_segment(aes(x=for_bar$Region,y=-Inf,xend=for_bar$Region,yend=0), linetype=3, colour="light gray") + theme(legend.position='none',axis.title.x=element_blank())
+
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/rep1_baselineFiltered_partherit_enrichment_color2.pdf", width = 9, height = 6, unit = "in")
+
+##### Bar plot for heritability proportion #####
+
+for_bar2 = old_and_new[,c("Region","rep1_prop","baselineFiltered_prop")] %>% 
+  gather(Dataset, Proportion, -Region) %>%
+  mutate(Region = factor(Region)) %>%
+  arrange(Region)
+
+se2 = old_and_new[,c("Region","rep1_prop_se","baselineFiltered_prop_se")] %>% 
+  gather(Dataset, SE, -Region) %>%
+  mutate(Region = factor(Region)) %>%
+  arrange(Region)
+
+for_bar2$Significance = stars$Significance
+for_bar2$SE = se2$SE
+for_bar2$Region = factor(for_bar2$Region, levels = regionordering$Region)
+for_bar2 = for_bar2[c(which(for_bar2$Region=="Full"),which(for_bar2$Region!="Full")),] # move 
+
+label.df.rep12 = for_bar2[for_bar2$Significance=="Yes"&for_bar2$Dataset=="rep1_prop",]
+label.df.baselineFiltered2 = for_bar2[for_bar2$Significance=="Yes"&for_bar2$Dataset=="baselineFiltered_prop",]
+
+bargraph_prop = ggplot(data = for_bar2,aes(x = Region,
+                                     y = Proportion,
+                                     fill = Dataset)) +
+           geom_bar(stat = "identity", position = position_dodge()) +
+           geom_errorbar(aes(ymin=Proportion-SE, ymax=Proportion+SE),width=0.2,
+                         position = position_dodge(width = 0.9)) +
+           theme_classic() +
+           theme(legend.title=element_blank(),axis.text.x = element_text(angle = 45, hjust = 1)) +
+           labs(x = "Region", y = expression("Heritability Proportion"),
+           title = "Proportion of heritability") + 
+           scale_fill_manual(values=c("yellow4","sienna4"),labels=c("Baseline Filtered","Replication")) +
+           geom_text(data = label.df.rep12,aes(x=Region, y=Proportion + 0.05), label = "* ", color="yellow4") +
+           geom_text(data = label.df.baselineFiltered2,aes(x=Region, y=Proportion + 0.05), label = " *",color="sienna4") +
+           geom_segment(aes(x=for_bar$Region,y=-Inf,xend=for_bar$Region,yend=0), linetype=3, colour="light gray") + theme(legend.position="bottom")
+
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/rep1_baselineFiltered_partherit_proportion_color2.pdf", width = 9, height = 6, unit = "in")
+
+##
+plot_grid(bargraph_enrichment,bargraph_prop,labels=c('A','B'),label_size = 12, ncol=1)
+ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/rep1_baselineFiltered_partherit_enrichment_and_proportion_v2.pdf", width = 9, height = 8, unit = "in")
+```
+
+## b. Overlap between annotation pairs
+
+There are indeed quite a lot of overlapping regions, especially among various types of Human Gained Enhancer sites. However, it is curious to see that that are overlaps between Neanderthal Introgressed SNPs and Neanderthal Lineage Depleted regions. I can look into overlap of these two annotations again. ***A table showing overlap lengths is attached in the email as the table did not fit here.***
+
+```{r annotation overlap, echo=FALSE, fig.height=6,fig.width=6, fig.cap='Evolutionary annotation overlap lengths in basepairs (bp).'}
+#"foverlap" function is taken from Else Eising's script. Finds overlap between intervals, in this case genomic annotations.
+
+fbeds = "/data/clusterfs/lag/users/gokala/enigma-evol/partherit/beds/"
+beds = list.files("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/beds/",pattern = "\\.")
+
+summary_df = as.data.frame(matrix(0,ncol=length(beds),nrow=length(beds)))
+rownames(summary_df) = beds
+colnames(summary_df) = beds
+
+for (i in beds) {
+  tmp_bed = read.table(paste0(fbeds,i))
+  tmp_bed = tmp_bed[,c(1,2,3)]
+  colnames(tmp_bed) = c("chr", "start", "end")
+  tmp_bed$length = (tmp_bed$end - tmp_bed$start)
+  setDT(tmp_bed)
+  setkey(tmp_bed, chr, start, end)
+
+    for (j in beds) {
+    tmp_bed_2 = read.table(paste0(fbeds,j))
+    tmp_bed_2 = tmp_bed_2[,c(1,2,3)]
+    colnames(tmp_bed_2) = c("chr", "start", "end")
+    tmp_bed_2$length = (tmp_bed_2$end - tmp_bed_2$start)
+    setDT(tmp_bed_2)
+    setkey(tmp_bed_2, chr, start, end)
+        
+    overlap = foverlaps(tmp_bed, tmp_bed_2, by.x=c("chr", "start", "end"), type="any", mult="all", nomatch = 0)
+    overlap$max_start = pmax(overlap$start,overlap$i.start)
+    overlap$min_end = pmin(overlap$end,overlap$i.end)
+    overlap$overlap_length = overlap$min_end - overlap$max_start
+    summary_df[i,j] = sum(overlap$overlap_length)
+
+    }
+}
+
+annotations = c("Human Gained Enhancers - 12 PCW (Frontal)",
+                "Human Gained Enhancers - 12 PCW (Occipital)",
+                "Human Gained Enhancers - 7 PCW",
+                "Human Gained Enhancers - 8.5 PCW",
+                "Human Gained Enhancers - Adult human vs. chimpanzee (prefrontal cortex)",
+                "Human Gained Promoters - Adult human vs. chimpanzee (prefrontal cortex)",
+                "Human Accelerated Regions",
+                "Human Gained Enhancers - Adult human vs. macaque (prefrontal cortex)",
+                "Human Gained Promoters - Adult human vs. macaque (prefrontal cortex)",
+                "Neanderthal Lineage Depleted Regions",
+                "Neanderthal Introgressed SNPs",
+                "Selective Sweeps")
+
+rownames(summary_df) = annotations
+colnames(summary_df) = annotations
+
+# colorize the diagonal elements in table with non-ints
+for (i in 1:(ncol(summary_df))) {
+  summary_df[i,i] = cell_spec(summary_df[i,i], bold=T, background = "lightgray")
+}
+
+overlap_table = kable(summary_df, caption = "Overlapping sequence length for each annotation pair (bp)", align = "c", escape = F,format="latex",booktabs=T) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, html_font = "Cambria", font_size = )  %>% kableExtra::landscape()
+
+#overlap_table
+#, table.attr = "style = \"color: black;\""
+#save_kable(overlap_table,"/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/plots/annotation_overlap_table2.png")
+  
+```

@@ -1,8 +1,4 @@
-#!/bin/sh
-#$ -N part_herit
-#$ -cwd
-#$ -q single15.q
-#$ -S /bin/bash
+#!/bin/bash
 
 ftrait=$1
 fannot=$2

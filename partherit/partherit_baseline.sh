@@ -1,8 +1,4 @@
 #!/bin/sh
-#$ -N part_herit
-#$ -cwd
-#$ -q multi.q
-#$ -S /bin/bash
 
 ftrait=$1
 fannot=$2

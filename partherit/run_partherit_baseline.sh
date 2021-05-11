@@ -27,7 +27,7 @@ while read a; do
    echo $a
    tmp_file=$(basename "$a")
    echo $tmp_file
-   tmp_pheno="$(cut -d'_' -f1,2 <<<"$tmp_file")"
+   tmp_pheno="$(cut -d'_' -f5,6 <<<"$tmp_file")"
    echo $tmp_pheno
    #tmp_output="${outDir}${annot}"
    
@@ -52,10 +52,10 @@ while read a; do
 	   echo '#!/bin/sh
 #$ -N partherit
 #$ -cwd
-#$ -q multi15.q
+#$ -q multi.q
 #$ -S /bin/bash
 
-/data/clusterfs/lag/users/gokala/enigma-evol/partherit/run_partitioned_heritability_1KG_Phase3_baseline_template.sh '$a' '$annot' '$tmp_output'' > $shellFile
+/data/clusterfs/lag/users/gokala/enigma-evol/partherit/partherit_baseline.sh '$a' '$annot' '$tmp_output'' > $shellFile
    	
 	   chmod a+x $shellFile
 	   echo "Created the script for cluster ->  submitting ${tmp_pheno} to the Grid"
@@ -66,10 +66,10 @@ while read a; do
 	   
 	   echo '#$ -N partherit
 #$ -cwd
-#$ -q multi15.q
+#$ -q multi.q
 #$ -S /bin/bash
 
-/data/clusterfs/lag/users/gokala/enigma-evol/partherit/run_partitioned_heritability_1KG_Phase3_baseline_plus_extra_template.sh '$a' '$annot' '$tmp_output' '$baseline'' > $shellFile
+/data/clusterfs/lag/users/gokala/enigma-evol/partherit/partherit_baseline_and_extraAnnot.sh '$a' '$annot' '$tmp_output' '$baseline'' > $shellFile
 	   
 	   chmod a+x $shellFile
 	   echo "Created the script for cluster ->  submitting ${tmp_pheno} to the Grid"
@@ -78,7 +78,7 @@ while read a; do
 
 	   fi
 
-   done < $annotFile;
+   done;
 
 done < $mungedSumstats
 
