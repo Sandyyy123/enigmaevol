@@ -2,12 +2,12 @@
 #---- Clumping w/PLINK ----
 #--------------------------
 
-# 
+# clump sumstats before overlap analysis.
 
 #-----Variables-----
 
-sumstatsList="/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/replication_v1/txt_sumstats/SA_sumstats_txt_list.txt"
-outDir="/data/clusterfs/lag/users/gokala/enigma-evol/eqtl/clumped_ancestry_regressed_sumstats/"
+sumstatsList="/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/sumstats_txt_list.txt"
+outDir="/data/clusterfs/lag/users/gokala/enigma-evol/eqtl/clumped_sumstats/european_lr/"
 genotypeFile="/data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/plink/1KG_phase3_GRCh37_EUR_nonFIN_allchr"
 
 #-----
@@ -34,5 +34,3 @@ plink --bfile '$genotypeFile' --clump '$i' --clump-r2 0.6 --clump-kb 100000 --cl
 done < $sumstatsList
 
 echo "Done!"
-
-# Now type "qstat" on bash and follow the status of your jobs.

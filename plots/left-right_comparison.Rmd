@@ -12,17 +12,14 @@ library(dplyr)
 library(ggplot2)
 library(ggpubr)
 library(cowplot)
+library(grid)
+library(gridExtra)
 ```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r read & clean data, echo=FALSE}
 # read the results table of HGE 7th PCW
-enrichment_scores = read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_with_global/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
+enrichment_scores = read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_hemi_spec_glob/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
+#read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_with_global/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
 enrichment_scores2 = read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_hemi_spec_glob/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
 
 # fix region names, get rid of blanks
@@ -49,15 +46,17 @@ I will add labels for the outlier regions.
 for_scatter = data.frame(Region = left_enrich$Region, left_enrich = left_enrich$Enrichment, right_enrich = right_enrich$Enrichment, left_enrich_se =  left_enrich$Enrichment_std_error, right_enrich_se = right_enrich$Enrichment_std_error, left_prop = left_enrich$Prop._h2, right_prop = right_enrich$Prop._h2, left_prop_se =  left_enrich$Prop._h2_std_error, right_prop_se = right_enrich$Prop._h2_std_error, left_sig=left_enrich$significant,right_sig=right_enrich$significant)
 for_scatter$Region=gsub("_le", "", for_scatter$Region)
 
-p1 = ggscatter(for_scatter, x = "right_enrich", y = "left_enrich", color = "yellow4",
+cor.test(for_scatter$left_enrich,for_scatter$right_enrich,method="pearson")
+
+p1 = ggscatter(for_scatter, x = "right_enrich", y = "left_enrich", color = "#00786A",
           add = "reg.line", cor.coef = TRUE, cor.method = "pearson",
           xlab = "Right Hemisphere", ylab = "Left Hemisphere", title = "Enrichment scores") +
   theme_bw()
-p2 = ggscatter(for_scatter, x = "right_prop", y = "left_prop",  color = "sienna4",
+p2 = ggscatter(for_scatter, x = "right_prop", y = "left_prop",  color = "#ED6B06",
           add = "reg.line", cor.coef = TRUE, cor.method = "pearson",
           xlab = "Right Hemisphere", ylab = "Left Hemisphere", title = "Proportion of heritability") + theme_bw()
 plot_grid(p1,p2,labels=c('A','B'),label_size = 12)
-ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/enrichment/left-right_enrichment_scatter.pdf",height = 4,width = 7)
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/enrichment/left-right_enrichment_scatter_hemiSpec_cov.pdf",height = 4,width = 7)
 ```
 
 ## Bar plot
@@ -146,12 +145,65 @@ bargraph_prop = ggplot(data = for_bar2,aes(x = Region,
 
 ##
 plot_grid(bargraph_enrichment,bargraph_prop,labels=c('A','B'),label_size = 12, ncol=1)
-ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/left_right_partherit_enrichment_and_proportion_v2.pdf", width = 9, height = 8, unit = "in")
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/left_right_partherit_enrichment_and_proportion_v2.pdf", width = 9, height = 8, unit = "in")
 ```
 
-
+# Back to back L-R h2 plot
 
 ```{r overlap analysis, echo=FALSE}
 
+g.mid = ggplot(for_bar2,aes(x=1,y=fct_rev(Region)))+geom_text(aes(label=Region),size=3.2)+
+  geom_segment(aes(x=0.94,xend=0.95,yend=Region))+
+  geom_segment(aes(x=1.05,xend=1.06,yend=Region))+
+  ggtitle("")+
+  ylab(NULL)+
+  scale_x_continuous(expand=c(0,0),limits=c(0.94,1.065))+
+  theme(axis.title=element_blank(),
+        panel.grid=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        panel.background=element_blank(),
+        axis.text.x=element_text(color=NA),
+        axis.ticks.x=element_blank(), #element_line(color=NA)
+        plot.margin = unit(c(1,-1,1,-1), "mm")) #unit(c(1,-1,1,-1), "mm")
+
+grid_plot1 = ggplot(data = for_bar2[for_bar2$Hemisphere=="left_prop",], aes(x = fct_rev(Region), y = Proportion)) +
+  geom_bar(stat = "identity",fill="#00786A") + ggtitle("                          Left Hemisphere") +
+  geom_errorbar(aes(ymin=Proportion-SE, ymax=Proportion+SE),
+                width=0.1,
+                position = position_dodge(width = 0.9)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank(),
+        panel.background=element_blank(),
+        plot.margin = unit(c(1,-1,1,0), "mm")) +
+  geom_text(data = label.df.left2,aes(x=Region, y=Proportion + 0.04), label = "*", color="#00786A") +
+  scale_y_reverse(lim=c(0.25,-0.07)) + coord_flip()
+
+grid_plot2 = ggplot(data = for_bar2[for_bar2$Hemisphere=="right_prop",], aes(x = fct_rev(Region), y = Proportion)) +xlab(NULL)+
+  geom_bar(stat = "identity",fill="#ED6B06") + ggtitle("Right Hemisphere") +
+  geom_errorbar(aes(ymin=Proportion-SE, ymax=Proportion+SE),
+                width=0.1,
+                position = position_dodge(width = 0.9)) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.background=element_blank(),
+        plot.margin = unit(c(1,0,1,-1), "mm")) + ylim(-0.07,0.25) +
+  geom_text(data = label.df.right2,aes(x=Region, y=Proportion + 0.04), label = "*", color="#ED6B06") +
+  coord_flip()
+
+gg1 <- ggplot_gtable(ggplot_build(grid_plot1))
+gg2 <- ggplot_gtable(ggplot_build(grid_plot2))
+gg.mid <- ggplot_gtable(ggplot_build(g.mid))
+
+#pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/h2_prop/left-right_proph2_barplot_hemiSpec_cov.pdf",height = 5,width = 7)
+grid.arrange(gg1,gg.mid,gg2,ncol=3,widths=c(4.2/11,2.6/11,4.2/11))
+#dev.off()
+
+for_bar2[for_bar2$Hemisphere=="left_prop",]
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/h2_prop/left-right_proph2_barplot_hemiSpec_cov.pdf",height = 4,width = 7)
 ```
 sessionInfo()

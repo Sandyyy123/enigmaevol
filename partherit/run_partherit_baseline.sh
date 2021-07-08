@@ -27,7 +27,7 @@ while read a; do
    echo $a
    tmp_file=$(basename "$a")
    echo $tmp_file
-   tmp_pheno="$(cut -d'_' -f5,6 <<<"$tmp_file")"
+   tmp_pheno="$(cut -d'_' -f4,5,6 <<<"$tmp_file")"
    echo $tmp_pheno
    #tmp_output="${outDir}${annot}"
    
@@ -55,12 +55,11 @@ while read a; do
 #$ -q multi.q
 #$ -S /bin/bash
 
-/data/clusterfs/lag/users/gokala/enigma-evol/partherit/partherit_baseline.sh '$a' '$annot' '$tmp_output'' > $shellFile
+/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/scripts/enigmaevol/partherit/partherit_baseline.sh '$a' '$annot' '$tmp_output'' > $shellFile
    	
-	   chmod a+x $shellFile
+	   chmod a+x ${shellFile}
 	   echo "Created the script for cluster ->  submitting ${tmp_pheno} to the Grid"
-	   qsub -wd "${inDir}/scripts" $shellFile
-	   qsub -o $logFile -j y $shellFile
+	   qsub -o ${logFile} -j y ${shellFile}
 	   
    	   else
 	   
@@ -69,12 +68,11 @@ while read a; do
 #$ -q multi.q
 #$ -S /bin/bash
 
-/data/clusterfs/lag/users/gokala/enigma-evol/partherit/partherit_baseline_and_extraAnnot.sh '$a' '$annot' '$tmp_output' '$baseline'' > $shellFile
+/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/scripts/enigmaevol/partherit/partherit_baseline_and_extraAnnot.sh '$a' '$annot' '$tmp_output' '$baseline'' > $shellFile
 	   
-	   chmod a+x $shellFile
+	   chmod a+x ${shellFile}
 	   echo "Created the script for cluster ->  submitting ${tmp_pheno} to the Grid"
-	   qsub -wd "${inDir}scripts" $shellFile
-	   qsub -o $logFile -j y $shellFile
+	   qsub -o ${logFile} -j y ${shellFile}
 
 	   fi
 

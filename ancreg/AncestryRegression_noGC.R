@@ -10,17 +10,17 @@ args = commandArgs(trailingOnly=TRUE)
 f1000G="/data/clusterfs/lag/users/gokala/genlang-evol/1kg_phase3_ns.allpop.unrel2261_eigenvec.P1to20_beta_se_pval.Rdata"
 load(f1000G)
 ##directory of spearman's output
-outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg/global/"
+outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_Rdata/replication/"
 ##Rdata files containing GWAS summary statistics
-rdatafileloc = "/data/clusterfs/lag/users/gokala/enigma-evol/sumstatsRdata/global"
+rdatafileloc = "/data/clusterfs/lag/users/gokala/enigma-evol/Rdata/replication"
 ##read in gwas statistics file (compiled for all traits)
-fGWASsumstats = "/data/clusterfs/lag/users/gokala/enigma-evol/sumstatsRdata/global/sumstats_rdata_list.txt"
+fGWASsumstats = "/data/clusterfs/lag/users/gokala/enigma-evol/Rdata/replication/munged_sumstats_list.txt"
 
 ##Match the Rdata file locations of sumstats, text file sumstats, and clumped files
 GWASsumstats=read.table(fGWASsumstats, header=FALSE)$V1
 ##Parse to get trait name
 tmpname = sapply(as.character(GWASsumstats),function (x) {unlist(strsplit(x,"/",fixed=TRUE))[10]})
-phenoname = paste(sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[7]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[8]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[9]}),sep="_")
+phenoname = paste(sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[4]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[5]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[6]}),sep="_")
 #phenoname = substr(tmpnamepheno,1,nchar(tmpnamepheno)-1)
 allfileloc = data.frame(rdatafile=GWASsumstats)
 

@@ -19,8 +19,8 @@ library(reshape2)
 
 ```{r read and clean data}
 # read correlation values
-e3=read.csv("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/ohbm/original_corvalues_Mean_Full_SurfArea_BJK.csv")
-e3_ancreg=read.csv("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/ohbm/ancestryregressed_corvalues_Mean_Full_SurfArea_BJK.csv")
+e3=read.csv("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/original_corvalues_Mean_Full_SurfArea_BJK.csv")
+e3_ancreg=read.csv("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/ancestryregressed_corvalues_Mean_Full_SurfArea_BJK.csv")
 rep_1=read.csv("/data/clusterfs/lag/users/gokala/enigma-evol/corvals/replication_v1/corvalues_SurfArea_global_total_BJK.csv")
 rep_1_ancreg=read.csv("/data/clusterfs/lag/users/gokala/enigma-evol/corvals/ancreg_replication_v1/corvalues_globalValues_averaged_SurfArea_ancreg_BJK.csv")
 
@@ -35,7 +35,7 @@ rep_1_ldsc[rep_1_ldsc$Region=="global",1]="Full"
 #rep_1_ldsc=rep_1_ldsc[69:83,]
 
 # read partitioned heritability files
-e3_partherit=read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/ohbm/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
+e3_partherit=read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
 e3_partherit=e3_partherit[e3_partherit$Analysis=="Surface Area",]
 rep_1_partherit=read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/replication_v1/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
 rep_1_partherit=rep_1_partherit[rep_1_partherit$Analysis=="Surface Area",]
@@ -46,9 +46,7 @@ merged3=merge(e3_partherit,rep_1_partherit,by="Region")
 merged3=merged3[,c("Region","Prop._h2.x","Prop._h2_std_error.x","significant.x","Prop._h2.y","Prop._h2_std_error.y","significant.y")]
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
+## E3 replication comparison part. h2 barplots
 
 ```{r pressure, echo=FALSE}
 
@@ -76,7 +74,7 @@ bonfsigind_rep_1 = which(rep_1[1,pind_rep_1] < 0.05/20)
 nomsigind_rep_1 = which(rep_1[1,pind_rep_1] >= 0.05/20 & rep_1[1,pind_rep_1] < 0.05)
 
 # E3 results shaded at the back and replication is at the front - plot & save
-pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/ohbm/corvalues_e3_vs_replication_darkgray.pdf", width = 8, height = 4)
+#pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/corvalues_e3_vs_replication_darkgray.pdf", width = 8, height = 4)
 barplot(as.matrix(e3[1,corind_e3]),col="dark gray",main="Mean Full Surface Area",ylab="correlation coefficient",xlab="Ancestry PC",names.arg=paste0("PC",seq(1,20)),ylim=c(-0.05,0.05),border=NA, yaxp = c(-0.05,0.05,2),las=2,cex.names=0.75)
 arrows(x_e3,y0_e3,x_e3,y1_e3,col="dark gray",angle=90,length=0)
 par(new = TRUE)
@@ -86,7 +84,7 @@ text(x_e3[bonfsigind_e3],col="dark gray",0.045,"*")
 text(x_e3[nomsigind_e3],col="dark gray",0.045,"o")
 text(x_rep_1[bonfsigind_rep_1],col="black",0.040,"*")
 text(x_rep_1[nomsigind_rep_1],col="black",0.040,"o")
-dev.off()
+#dev.off()
 
 ##### Ancestry regressed correlation plots
 # e3 plot
@@ -111,13 +109,13 @@ arrows(x_rep_1_ancreg,y0_rep_1_ancreg,x_rep_1_ancreg,y1_rep_1_ancreg,angle=90,le
 bonfsigind_rep_1_ancreg = which(rep_1_ancreg[1,pind_rep_1_ancreg] < 0.05/20)
 nomsigind_rep_1_ancreg = which(rep_1_ancreg[1,pind_rep_1_ancreg] >= 0.05/20 & rep_1_ancreg[1,pind_rep_1_ancreg] < 0.05)
 
-pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/ohbm/ancreg_corvalues_e3_vs_replication_darkgray.pdf", width = 8, height = 4)
+#pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/ancreg_corvalues_e3_vs_replication_darkgray.pdf", width = 8, height = 4)
 barplot(as.matrix(e3_ancreg[1,corind_e3_ancreg]),col="dark gray",main="Mean Full Surface Area",ylab="correlation coefficient",xlab="Ancestry PC",names.arg=paste0("PC",seq(1,20)),ylim=c(-0.05,0.05),border=NA, yaxp = c(-0.05,0.05,2),las=2,cex.names=0.75)
 arrows(x_e3_ancreg,y0_e3_ancreg,x_e3_ancreg,y1_e3_ancreg,col="dark gray",angle=90,length=0)
 par(new = TRUE)
 barplot(as.matrix(rep_1_ancreg[1,corind_rep_1_ancreg]),col="black",ylim=c(-0.05,0.05), yaxp = c(-0.05,0.05,2),las=2, xaxt="n")
 arrows(x_rep_1_ancreg,y0_rep_1_ancreg,x_rep_1_ancreg,y1_rep_1_ancreg,col="black",angle=90,length=0)
-dev.off()
+#dev.off()
 
 ```
 
@@ -126,13 +124,14 @@ dev.off()
 ## LDSC comparison plots
 e3_ldsc = e3_ldsc[c(which(e3_ldsc$Region=="Full"),which(e3_ldsc$Region!="Full")),] # move Full to the top
 my.order = seq(1,136,1)
-e3_ldsc$sample="Initial study"
+e3_ldsc$sample="Tilot et al. (2021)"
 rep_1_ldsc$sample="Replication"
 merged2=rbind(e3_ldsc,rep_1_ldsc)
+merged2$sample_f=factor(merged2$sample, levels= c("Tilot et al. (2021)","Replication"))
 
 ggplot(merged2, aes(fct_rev(reorder(Region,my.order)), LDSC_intercept,color=Anc_reg)) + 
   geom_errorbar(aes(ymax = LDSC_intercept + LDSC_int_sterr,  ymin = LDSC_intercept - LDSC_int_sterr), position = position_dodge(0.9),width=0) +
-  geom_point(position = position_dodge(0.9), size = 2) + facet_grid(. ~ sample) +
+  geom_point(position = position_dodge(0.9), size = 2) + facet_grid(. ~ sample_f) +
   scale_color_manual(name = "Ancestry regression", labels = c("After ancestry regression", "Prior to ancestry regression"),values=c("#af8dc3", "#7fbf7b")) +
   background_grid(major = 'y', minor = "none") + # add thin horizontal lines 
   labs(y = "LDSC Intercept", 
@@ -140,8 +139,9 @@ ggplot(merged2, aes(fct_rev(reorder(Region,my.order)), LDSC_intercept,color=Anc_
        title = "Changes in LDSC intercept due to ancestry regression") + 
   panel_border() + coord_flip() + geom_hline(yintercept = 1, linetype="dotted", 
                                                color = "black", size=0.5) +
-  theme(plot.title = element_text(hjust = 0.5))
-ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/plots/e3_rep_LDSC_intercepts_before_after_ancreg_w_errorbars_surfaceArea.pdf", width = 7, height = 9, unit = "in")
+  theme(plot.title = element_text(hjust = 0.5),text=element_text(size=17))
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/plots/e3_rep_LDSC_intercepts_before_after_ancreg_w_errorbars_surfaceArea4.pdf", width = 9, height = 9, unit = "in")
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/plots/e3_rep_LDSC_intercepts_before_after_ancreg_w_errorbars_surfaceArea6.png", unit = "in",dpi = 400)
 ```
 
 ```{r partitioned heritability}
@@ -157,18 +157,19 @@ label.df.x <- data.frame(Region = merged3$Region[merged3$significant.x=="Yes"],P
 label.df.y <- data.frame(Region = merged3$Region[merged3$significant.y=="Yes"],Prop._h2.y=merged3$Prop._h2.y[merged3$significant.y=="Yes"]+0.09)
 colnames(label.df.y)[2]="Prop._h2.x"
 
-ggplot(data = merged3, aes(Region, Prop._h2.x)) +
-  geom_bar(stat = "identity", position = "dodge", fill = "dark gray") +
-  geom_linerange(position = position_dodge(width = 0.9), aes(ymin = Prop._h2.x - Prop._h2_std_error.x, ymax = Prop._h2.x + Prop._h2_std_error.x),color="dark gray") +
-  geom_bar(data=merged3, aes(Region, Prop._h2.y), stat = "identity", position = "dodge", fill = "burlywood4") +
-  geom_linerange(position = position_dodge(width = 0.9), aes(ymin = Prop._h2.y - Prop._h2_std_error.y, ymax = Prop._h2.y + Prop._h2_std_error.y),color="burlywood4") +
+p=ggplot(data = merged3, aes(Region, Prop._h2.x)) +
+  geom_bar(stat = "identity", position = "dodge", fill = "#F7B682") +
+  geom_linerange(position = position_dodge(width = 0.9), aes(ymin = Prop._h2.x - Prop._h2_std_error.x, ymax = Prop._h2.x + Prop._h2_std_error.x),color="#F7B682") +
+  geom_bar(data=merged3, aes(Region, Prop._h2.y), stat = "identity", position = "dodge", fill = "#ED6B06") +
+  geom_linerange(position = position_dodge(width = 0.9), aes(ymin = Prop._h2.y - Prop._h2_std_error.y, ymax = Prop._h2.y + Prop._h2_std_error.y),color="#ED6B06") +
   theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size=5)) +
   theme(legend.position = "bottom") +
   labs(x = "Region", y = expression(paste("Prop. ", italic("h"^{2}))),
     title = "Partitioned heritability for cortical surface area, following ancestry regression",
-    subtitle = "Proportion of heritability explained") +
-  geom_text(data = label.df.x, label = "*", col="dark gray") +
-  geom_text(data = label.df.y, label = "*", col="burlywood4")
-ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/plots/e3_rep_partherit_w_errorbars_surfaceArea_darkgray.pdf", width = 9, height = 6, unit = "in")
+    subtitle = "Proportion of heritability explained",size=5) +
+  geom_text(data = label.df.x, label = "*", col="#F7B682",size=5) +
+  geom_text(data = label.df.y, label = "*", col="#ED6B06",size=5)
+ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/plots/e3_rep_partherit_w_errorbars_surfaceArea_mpi_colors.pdf", width = 9, height = 6, unit = "in")
+ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/plots/e3_rep_partherit_w_errorbars_surfaceArea_mpi_colors4.png", width = 16, height = 9, dpi = 500, device="png",scale=0.3)
 ```

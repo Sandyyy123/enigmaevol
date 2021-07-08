@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -N run_sumstats_Rdata2txt
+#$ -N sumstats_Rdata2txt
 #$ -cwd
 #$ -q single15.q
 #$ -S /bin/bash

@@ -1,7 +1,7 @@
 #!/bin/bash
 #########################################################
 # Make .annot and .l2 files for LDSC part. heritability
-# Download the last version of bedtools to your local
+# Download the latest version of bedtools to your local
 # directory. Set path to that dir. with:
 # export PATH="/home/gokala/bedtools2/bin:$PATH"
 # Then you will not have any issues.
@@ -12,9 +12,9 @@
 annot=$1
 ldscDir="/home/gokala/ldsc/"
 hapMap="/data/workspaces/lag/shared_spaces/Resource_DB/LDscores/Phase3/1000G_EUR_Phase3_baseline/print_snps.txt"
-oneKg="/data/clusterfs/lag/users/gokala/enigma-evol/partherit/annotations/1000G_EUR_Phase3_plink/"
-mainDir="/data/clusterfs/lag/users/gokala/enigma-evol/partherit/beds/new_beds/"
-outDir="/data/clusterfs/lag/users/gokala/enigma-evol/partherit/beds/new_beds/new_annots/"
+oneKg="/data/clusterfs/lag/users/gokala/enigma-evol/partherit/1000G_EUR_Phase3_plink/"
+mainDir="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/new_annotations/beds/GRCh37/"
+outDir="/data/clusterfs/lag/users/gokala/enigma-evol/partherit/new_annotations/nean_RA_hg19.sorted/"
 
 #########################################################
 # Make .annot files

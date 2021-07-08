@@ -30,14 +30,10 @@ library(biomaRt)
 library(diffloop)
 library(plotly)
 
-
 ### Load descriptions of the brain surface and regions
 regionordering <- read.csv("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/freesurfer_orderandcolor.csv")
 load("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/FreesurferRegionalObjs.Rdata")
 str(objs)
-
-
-
 
 ### Surface Area ###
 # This function is fully commented, the Thickness version is essentially the same
@@ -52,7 +48,7 @@ brainplot_SA <- function(dta,
                          low_color, 
                          high_color, 
                          nonsig_color) {
-
+  
   ## Load your data frame and set columns to be used for plotting
   fZ <- dta
   fZ$SNP <- fZ[, loop_over]
@@ -63,8 +59,8 @@ brainplot_SA <- function(dta,
   Z.TH <- fZ[grepl("Thick", fZ[[analysis_col]]), ] # does the same, but for thickness data
 
   ## Cleaning up the names of the brain regions in the objs list, and removing the left hemisphere versions (we only need one set)
-  objs <- objs[1:35]
-  #objs <- objs[1:35] - changed this bit to plot right hemisphere (1:35=left, 36:70=right)
+  objs <- objs[36:70]
+  #objs <- objs[1:35] - changed this bit to plot right hemisphere (1:35=left, 36:70=right) - Gokberk
   names(objs) <- sapply(names(objs), function(x) {
     unlist(strsplit(x, ".", fixed = TRUE))[length(unlist(strsplit(x, ".", fixed = TRUE)))]
   })
@@ -158,13 +154,14 @@ brainplot_SA <- function(dta,
     }
     # Save an html file where the "camera" is pointed at the medial surface of the brain
     p <- layout(p = p, scene = list(xaxis = ax, yaxis = ax, zaxis = ax, camera = list(eye = list(x = 2, y = 0, z = 0))), title = ftitle)
+    #export(p, file = paste0(out_prefix, uniquesnps.SA[j], "_medial_SA_", out_suffix, ".png"))
     htmlwidgets::saveWidget(p, file = paste0(out_prefix, uniquesnps.SA[j], "_medial_SA_", out_suffix, ".html"), selfcontained = FALSE)
     # Same for the lateral surface of the brain
     p <- layout(p = p, scene = list(xaxis = ax, yaxis = ax, zaxis = ax, camera = list(eye = list(x = -2, y = 0, z = 0))), title = ftitle)
+    #orca(p, file = paste0(out_prefix, uniquesnps.SA[j], "_lateral_SA_", out_suffix, ".png"))
     htmlwidgets::saveWidget(p, file = paste0(out_prefix, uniquesnps.SA[j], "_lateral_SA_", out_suffix, ".html"), selfcontained = FALSE)
   }
 }
-
 
 ### Thickness ###
 
@@ -259,9 +256,11 @@ brainplot_TH <- function(dta, out_prefix, out_suffix, loop_over, region_col, Z_c
       }
     }
     p <- layout(p = p, scene = list(xaxis = ax, yaxis = ax, zaxis = ax, camera = list(eye = list(x = 2, y = 0, z = 0))), title = ftitle)
-    htmlwidgets::saveWidget(p, file = paste0(out_prefix, uniquesnps.TH[j], "_medial_TH_", out_suffix, ".html"), selfcontained = FALSE)
+    export(p, file = paste0(out_prefix, uniquesnps.SA[j], "_medial_TH_", out_suffix, ".png"))
+    #htmlwidgets::saveWidget(p, file = paste0(out_prefix, uniquesnps.TH[j], "_medial_TH_", out_suffix, ".html"), selfcontained = FALSE)
     p <- layout(p = p, scene = list(xaxis = ax, yaxis = ax, zaxis = ax, camera = list(eye = list(x = -2, y = 0, z = 0))), title = ftitle)
-    htmlwidgets::saveWidget(p, file = paste0(out_prefix, uniquesnps.TH[j], "_lateral_TH_", out_suffix, ".html"), selfcontained = FALSE)
+    export(p, file = paste0(out_prefix, uniquesnps.SA[j], "_medial_TH_", out_suffix, ".png"))
+    #htmlwidgets::saveWidget(p, file = paste0(out_prefix, uniquesnps.TH[j], "_lateral_TH_", out_suffix, ".html"), selfcontained = FALSE)
   }
 }
 
@@ -374,7 +373,8 @@ brainplot_full <- function(dta, out_prefix, out_suffix, loop_over, region_col, Z
     p <- layout(p = p, scene = list(xaxis = ax, yaxis = ax, zaxis = ax, camera = list(eye = list(x = -2, y = 0, z = 0))), title = ftitle)
     p_file <- paste0(out_prefix, uniquesnps.TH[j], "_lateral_fullTH_", out_suffix, ".html")
     message(p_file)
-    htmlwidgets::saveWidget(p, file = p_file, selfcontained = FALSE)
+    export(p, file = paste0(p_file, out_suffix, ".png"))
+    #htmlwidgets::saveWidget(p, file = p_file, selfcontained = FALSE)
   }
 
   for (j in 1:length(uniquesnps.SA)) {

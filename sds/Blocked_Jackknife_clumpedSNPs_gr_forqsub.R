@@ -9,35 +9,35 @@ library(GenomicRanges);
 #csv_mergedGR=read.csv("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/ancreg/surfaceDK_parsorbitalis_globalCov_ancreg.csv")
 
 ##load SDS file
-fSDS="/data/workspaces/lag/workspaces/lg-genlang/Working/Evolution/SDS/SDS_UK10K_n3195_release_Sep_19_2016.tab.gz"
+fSDS="/data/workspaces/lag/workspaces/lg-genlang/Working/Evolution/resources/SDS_UK10K_n3195_release_Sep_19_2016.tab.gz"
 ##directory of spearman's output
-outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/l-r/sds"
+outputdir = "/data/clusterfs/lag/users/gokala/enigma-evol/sds/ancreg_replication"
 ##Rdata files containing GWAS summary statistics
-rdatafileloc = "/data/clusterfs/lag/users/gokala/enigma-evol/l-r/ancreg/global/"
+rdatafileloc = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_Rdata/replication/"
 ##read in gwas statistics file (compiled for all traits)
-fGWASsumstats = "/data/clusterfs/lag/users/gokala/enigma-evol/l-r/ancreg/global/sumstats_rdata_list.txt"
+fGWASsumstats = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_Rdata/replication/munged_sumstats_list.txt"
 
 ##Read in SDS file
-SDS=read.table(fSDS, fill=TRUE, header=TRUE);
+SDS=read.table(fSDS, fill=TRUE, header=TRUE)
 
 ##Match the Rdata file locations of sumstats, text file sumstats, and clumped files
 GWASsumstats=read.table(fGWASsumstats, header=FALSE)$V1;
 ##Parse to get trait name - UPDATE THIS PART ACCORDING TO YOUR PATH AND FILE NAMES
-tmpname = sapply(GWASsumstats,function (x) {unlist(strsplit(as.character(x),"/",fixed=TRUE))[11]});
-phenoname = paste(sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]}),sapply(tmpname,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[3]}),sep="_");
-allfileloc = data.frame(rdatafile=GWASsumstats);
+tmpname = sapply(GWASsumstats,function (x) {unlist(strsplit(as.character(x),"/",fixed=TRUE))[10]})
+phenoname = sapply(tmpname,function (x) {unlist(strsplit(x,".",fixed=TRUE))[1]})
+allfileloc = data.frame(rdatafile=GWASsumstats)
 
 output=data.frame(global_corr_spearman=rep(NA, nrow(allfileloc)),
                BJK_ESTIM_AVE=rep(NA, nrow(allfileloc)),
                BJK_ESTIM_SE=rep(NA, nrow(allfileloc)),
                BJK_ESTIM_Z=rep(NA, nrow(allfileloc)),
-               BJK_ESTIM_PVAL=rep(NA, nrow(allfileloc)));
+               BJK_ESTIM_PVAL=rep(NA, nrow(allfileloc)))
 #i=67
 ##Loop over each of the phenotypes
 for (i in 1:nrow(allfileloc)) {
-    pheno = phenoname[i];
+    pheno = phenoname[i]
     cat(' Working on:', pheno, '\n')
-    cat('loading in',pheno,'pre-existing Rdata file...\n');
+    cat('loading in',pheno,'pre-existing Rdata file...\n')
     #load(allfileloc$rdatafile[i])
     load(allfileloc$rdatafile[i])
     ##calculate Z score in GWAS files
@@ -72,78 +72,78 @@ for (i in 1:nrow(allfileloc)) {
     merged$Z[negind]= -1* merged$Z[negind]
 
     ##Sort the merged file by genomic location
-    newmergedGR = GRanges(merged$CHR,IRanges(merged$POS,merged$POS));
-    mcols(newmergedGR) = merged[,c(1,4:17,25)]; # for ENIGMA-replication ancreg sumstats, added 25th column (Z) here, otherwise "dat" didn't have newmergedGR$Z (19th column for non-ancreg sumstats)
-    newmergedGR = sort(sortSeqlevels(newmergedGR));
+    newmergedGR = GRanges(merged$CHR,IRanges(merged$POS,merged$POS))
+    mcols(newmergedGR) = merged[,c(1,4:17,25)] # for ENIGMA-replication ancreg sumstats, added 25th column (Z) here, otherwise "dat" didn't have newmergedGR$Z (19th column for non-ancreg sumstats)
+    newmergedGR = sort(sortSeqlevels(newmergedGR))
     
-    dat = cbind(newmergedGR$SDS, newmergedGR$Z);
+    dat = cbind(newmergedGR$SDS, newmergedGR$Z)
 
-    n_snps = dim(dat)[1];
-    jackknife_num_blocks_flag = 100;
-    BJK_num_blocks=jackknife_num_blocks_flag;
-    BJK_block_size=floor(n_snps/BJK_num_blocks);
-    BJK_num_blocks_p1=n_snps%%BJK_block_size;
+    n_snps = dim(dat)[1]
+    jackknife_num_blocks_flag = 100
+    BJK_num_blocks=jackknife_num_blocks_flag
+    BJK_block_size=floor(n_snps/BJK_num_blocks)
+    BJK_num_blocks_p1=n_snps%%BJK_block_size
 
     ##tests: spearman corr > 0
-    num_tests= 1;
-
+    num_tests= 1
+    
     ##Store leave-one-block-out estimates for different stats
-    BJK_PSEUDO= matrix(0, nrow=BJK_num_blocks, ncol=num_tests);
-    head(dat)
-    global_corr_spearman=cor(dat[,1],dat[,2],method="spearman");
+    BJK_PSEUDO= matrix(0, nrow=BJK_num_blocks, ncol=num_tests)
+    
+    global_corr_spearman=cor(dat[,1],dat[,2],method="spearman")
 
-    BJK_end=0;
-    BJK_start=1;
-    BJK_NatBrkPnt_start = 1;
-    BJK_NatBrkPnt_end   = 1;
+    BJK_end=0
+    BJK_start=1
+    BJK_NatBrkPnt_start = 1
+    BJK_NatBrkPnt_end   = 1
 
     for (BJK_iter in 1:BJK_num_blocks) {
     	##update
-        BJK_start=BJK_end + 1;
+        BJK_start=BJK_end + 1
 
         if (BJK_iter <= BJK_num_blocks_p1){
-           BJK_end = min(BJK_start + BJK_block_size,n_snps);
+           BJK_end = min(BJK_start + BJK_block_size,n_snps)
         } else {
-           BJK_end = min(BJK_start + BJK_block_size - 1,n_snps);
+           BJK_end = min(BJK_start + BJK_block_size - 1,n_snps)
         }
 
         if (BJK_start == 1) {
-           working_indices = (BJK_end+1):n_snps;
+           working_indices = (BJK_end+1):n_snps
         } else if (BJK_end == n_snps) {
-           working_indices = 1:(BJK_start-1);
+           working_indices = 1:(BJK_start-1)
         } else {
-           working_indices = c(1:(BJK_start-1),(BJK_end+1):n_snps);
+           working_indices = c(1:(BJK_start-1),(BJK_end+1):n_snps)
         }
 
       	## The Jackknife pseudovalues
-        leave_block_out_corr_spearman=cor(dat[working_indices,1],dat[working_indices,2],method="spearman");
-        BJK_PSEUDO[BJK_iter,1] = BJK_num_blocks * global_corr_spearman - (BJK_num_blocks-1) * leave_block_out_corr_spearman;
+        leave_block_out_corr_spearman=cor(dat[working_indices,1],dat[working_indices,2],method="spearman")
+        BJK_PSEUDO[BJK_iter,1] = BJK_num_blocks * global_corr_spearman - (BJK_num_blocks-1) * leave_block_out_corr_spearman
    }
 
    ## Jackknife estimates of mean & standard-error => p-value
 
-   BJK_ESTIM_AVE  = matrix(apply(BJK_PSEUDO,2,mean),nrow=1);
-   BJK_ESTIM_SE   = matrix(apply(BJK_PSEUDO,2,sd)/sqrt(BJK_num_blocks),nrow=1);
-   BJK_ESTIM_Z    = matrix(BJK_ESTIM_AVE/BJK_ESTIM_SE,nrow=1);
-   BJK_ESTIM_PVAL = matrix(2*pnorm( -abs(BJK_ESTIM_Z) ),nrow=1);
-   row.names(BJK_ESTIM_AVE) = "average";
-   row.names(BJK_ESTIM_SE) = "error";
-   row.names(BJK_ESTIM_Z) = "z-score";
-   row.names(BJK_ESTIM_PVAL) = "p-value";
-   BJK_ESTIM_AVE  =  signif(BJK_ESTIM_AVE,4);
-   BJK_ESTIM_SE   =  signif(BJK_ESTIM_SE,4);
-   BJK_ESTIM_Z    =  signif(BJK_ESTIM_Z,4);
-   BJK_ESTIM_PVAL =  signif(BJK_ESTIM_PVAL,4);
+   BJK_ESTIM_AVE  = matrix(apply(BJK_PSEUDO,2,mean),nrow=1)
+   BJK_ESTIM_SE   = matrix(apply(BJK_PSEUDO,2,sd)/sqrt(BJK_num_blocks),nrow=1)
+   BJK_ESTIM_Z    = matrix(BJK_ESTIM_AVE/BJK_ESTIM_SE,nrow=1)
+   BJK_ESTIM_PVAL = matrix(2*pnorm( -abs(BJK_ESTIM_Z) ),nrow=1)
+   row.names(BJK_ESTIM_AVE) = "average"
+   row.names(BJK_ESTIM_SE) = "error"
+   row.names(BJK_ESTIM_Z) = "z-score"
+   row.names(BJK_ESTIM_PVAL) = "p-value"
+   BJK_ESTIM_AVE  =  signif(BJK_ESTIM_AVE,4)
+   BJK_ESTIM_SE   =  signif(BJK_ESTIM_SE,4)
+   BJK_ESTIM_Z    =  signif(BJK_ESTIM_Z,4)
+   BJK_ESTIM_PVAL =  signif(BJK_ESTIM_PVAL,4)
 
    cat("Block-jackknife output\n")
-   cat("Global Spearman corr: ", global_corr_spearman, "\n");
+   cat("Global Spearman corr: ", global_corr_spearman, "\n")
 
    output$global_corr_spearman[i]=global_corr_spearman
-   output$BJK_ESTIM_AVE[i]=BJK_ESTIM_AVE;
-   output$BJK_ESTIM_SE[i]=BJK_ESTIM_SE;
-   output$BJK_ESTIM_Z[i]=BJK_ESTIM_Z;
-   output$BJK_ESTIM_PVAL[i]=BJK_ESTIM_PVAL;
+   output$BJK_ESTIM_AVE[i]=BJK_ESTIM_AVE
+   output$BJK_ESTIM_SE[i]=BJK_ESTIM_SE
+   output$BJK_ESTIM_Z[i]=BJK_ESTIM_Z
+   output$BJK_ESTIM_PVAL[i]=BJK_ESTIM_PVAL
 
-   rownames(output)[i]=pheno;
-   write.csv(output, file=paste0(outputdir, "/SDS_bjk_ancreg_1kblocks_globals.csv"));
+   rownames(output)[i]=pheno
+   write.csv(output, file=paste0(outputdir, "/SDS_BJK_ancreg_replication_1kblocks_globals.csv"))
 }

@@ -21,7 +21,7 @@ python /home/gokala/ldsc/ldsc.py \
 --out ${foutput} \
 --frqfile-chr /data/workspaces/lag/shared_spaces/Resource_DB/LDscores/Phase3/1000G_Phase3_frq/1000G.EUR.QC. \
 --overlap-annot \
---ref-ld-chr /data/clusterfs/lag/users/gokala/enigma-evol/partherit/amanda_annotations/${fannot}/${annot}.,/data/clusterfs/lag/users/gokala/enigma-evol/partherit/amanda_annotations/${fbaseline}/${fbaseline}.,/data/clusterfs/lag/users/gokala/enigma-evol/partherit/baselineLD/baselineLD. \
+--ref-ld-chr /data/clusterfs/lag/users/gokala/enigma-evol/partherit/new_annotations/${fannot}/${annot}.,/data/clusterfs/lag/users/gokala/enigma-evol/partherit/new_annotations/${fbaseline}/${fbaseline}.,/data/clusterfs/lag/users/gokala/enigma-evol/partherit/baselineLD/baselineLD. \
 --w-ld-chr /data/workspaces/lag/shared_spaces/Resource_DB/LDscores/Phase3/1000G_Phase3_weights_hm3_no_MHC/weights.hm3_noMHC. \
 --print-coefficients
 

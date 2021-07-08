@@ -6,16 +6,19 @@ library(forcats)
 
 fcorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/sds/SDS_bjk_ancreg_1kblocks.csv"
 fcorvals_eur = "/data/clusterfs/lag/users/gokala/enigma-evol/sds/SDS_bjk_ancreg_1kblocks_replication2.csv"
-fjason_corvals = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/SDS_bjk_ancreg_1kblocks_fromJason.csv"
+fjason_corvals = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/sds/SDS_bjk_ancreg_1kblocks_fromJason.csv"
 corvals = read.csv(fcorvals,stringsAsFactors=F)
 corvals_eur = read.csv(fcorvals_eur,stringsAsFactors=F)
 jason_corvals = read.csv(fjason_corvals,stringsAsFactors=F)
+
+hist(jason_corvals$BJK_ESTIM_AVE)
+hist(corvals$BJK_ESTIM_)
 
 ## Pick relevant rows and columns from raw SDS outputs
 
 # Prep E3 results
 jason_corvals = jason_corvals[grepl("(?=.*_surfavg)|(?=.*Full)(?=.*Surf)",jason_corvals$X,perl=T),]
-jason_corvals=jason_corvals[,c(1,5,6)]
+jason_corvals=jason_corvals[,c(1,3,6)]
 jason_corvals=jason_corvals[jason_corvals$X!="Mean_temporalpole_surfavg",] # remove temporal lobe, because it's not included in the replication
 jason_corvals$mergeCol = sapply(jason_corvals$X,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]})
 
@@ -23,7 +26,7 @@ jason_corvals$mergeCol = sapply(jason_corvals$X,function (x) {unlist(strsplit(x,
 
 brit_surface = corvals %>%
   filter(grepl("(?=.*surfaceDK)(?=.*_globalCov)",corvals$X,perl=TRUE)) %>%
-  select(X, BJK_ESTIM_Z, BJK_ESTIM_PVAL)
+  select(X, BJK_ESTIM_AVE, BJK_ESTIM_PVAL)
 
 brit_surface$X[8]="Mean_Full_Surface"
 brit_surface=brit_surface[-9,] #remove globScaled row, because it is replicate of Mean_Full_Surface
@@ -46,11 +49,11 @@ eur_surface$mergeCol=sapply(eur_surface$X,function (x) {unlist(strsplit(x,"_",fi
 e3_eur = merge(jason_corvals,eur_surface,by="mergeCol")
 
 # Correlation plots
-ggscatter(e3_brit, x = "BJK_ESTIM_Z.x", y = "BJK_ESTIM_Z.y", 
+ggscatter(e3_brit, x = "BJK_ESTIM_AVE.x", y = "BJK_ESTIM_AVE.y", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
-          xlab = "E3", ylab = "White British subset", title = "Z-score comparison (surface area)")
-ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evol-pipeline/plots/sds/surface_e3_vs_britSub_scatter.pdf",width=7,height=7)
+          xlab = "E3", ylab = "White British subset", title = "Correlation-coefficient comparison (surface area)")
+ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/sds/surface_e3_vs_britSub_scatter_corCoef.pdf",width=7,height=7)
 
 ggscatter(e3_eur, x = "BJK_ESTIM_Z.x", y = "BJK_ESTIM_Z.y", 
           add = "reg.line", conf.int = TRUE, 

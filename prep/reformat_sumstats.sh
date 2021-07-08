@@ -23,7 +23,7 @@ echo "Starting to reformat sumstats at $dir"
 for file in $dir/*.txt; do
     echo "basename $file is being reformatted..."
     awk '{print $1, $2, $3, $4, $8, $9, $10, $16, $19, $17, $18}' $file > ${file%.txt}_formatted.txt
-    sed -Ei 's/MarkerName/SNP/;s/Allele1/A1/;s/Allele2/A2/;s/Freq1/FREQ1/;s/Effect/BETA/;s/StdErr/SE/;s/P-value/P/;s/TotalSampleSize/N/;s/chrposID/MARKER/;s/POS/BP/' ${file%.txt}_formatted.txt
+    sed -Ei '1s/MarkerName/SNP/;1s/Allele1/A1/;1s/Allele2/A2/;1s/Freq1/FREQ1/;1s/Effect/BETA/;1s/StdErr/SE/;1s/P-value/P/;1s/TotalSampleSize/N/;1s/chrposID/MARKER/;1s/POS/BP/' ${file%.txt}_formatted.txt
     chmod 777 ${file%.txt}_formatted.txt
     echo "Done!"
 done
