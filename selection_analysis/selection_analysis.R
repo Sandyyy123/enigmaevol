@@ -53,7 +53,8 @@ make_CSA_region_list_only_rsIDs = function(clumpedDir) {
   # each summary stats, use for SNPsnap
   # control variant generation
   clumpedSNPs = data.frame()
-  for (i in dir(clumpedDir,full.names = T,pattern = "clumped")) {
+  clumpedFiles = intersect(dir(clumpedDir,full.names = T,pattern = "surface"),dir(clumpedDir,full.names = T,pattern = "clumped"))
+  for (i in clumpedFiles) {
     region = sapply(i, function (x) {unlist(strsplit(as.character(x),"_",fixed=TRUE))[9]})
     tmp_clump = read.table(i,header=TRUE)
     tmp_df = data.frame(SNP=tmp_clump$SNP)
@@ -62,13 +63,15 @@ make_CSA_region_list_only_rsIDs = function(clumpedDir) {
   write.table(clumpedSNPs,paste0(outDir,"/surface_area_all.txt"),row.names = F, col.names = F, quote = F)
 }
 
-#get_num_LD_buddies = function(clumpedDir, outDir) {
-#  # get the rsIDs and LD buddy number from clumped file
-#  for (i in dir(clumpedDir,full.names = F, pattern = ".clumped")) {
-#    file_name = sapply(i, function (x) {unlist(strsplit(as.character(x),".",fixed=TRUE))[1]})
-#    system(paste0("awk '{print $3\"\t\"$6}' ", paste0(clumpedDir,"/",i), " > ", paste0(outDir,"/",i,"_LDbuddy_counts.txt"))) #TODO use column names instead of field numbers
-#  }
-#}
+get_num_LD_buddies = function(clumpedDir, outDir) {
+  # get the rsIDs and LD buddy number from clumped file
+  clumpedFiles = intersect(dir(clumpedDir,full.names = T,pattern = "surface"),dir(clumpedDir,full.names = T,pattern = "clumped"))
+  for (i in clumpedFiles) {
+    file_name_full = sapply(i, function (x) {unlist(strsplit(as.character(x),".",fixed=TRUE))[1]})
+    file_name_base = sapply(file_name_full, function (x) {unlist(strsplit(as.character(x),"/",fixed=TRUE))[11]})
+    system(paste0("awk '{print $3\"\t\"$6}' ", i, " > ", paste0(outDir,"/",file_name_base,"_LDbuddy_counts.txt"))) #TODO use column names instead of field numbers
+  }
+}
 
 #get_rsIDs_from_pos = function() { # instead of this, download annotations from SNPsnap
 #                                  # when generating the control variants.
@@ -123,7 +126,7 @@ make_CSA_region_list_only_rsIDs(clumpedDir)
 # Get number of SNPs in LD with each tag SNP
 ###
 
-# get_num_LD_buddies(clumpedDir,outDir)
+get_num_LD_buddies(clumpedDir,outDir)
 
 ###
 # Generate control variants with SNPsnap using
