@@ -1,18 +1,20 @@
+
+options(stringsAsFactors=FALSE)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(ggpubr)
 library(forcats)
 
-fcorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/sds/SDS_bjk_ancreg_1kblocks.csv"
-fcorvals_eur = "/data/clusterfs/lag/users/gokala/enigma-evol/sds/SDS_bjk_ancreg_1kblocks_replication2.csv"
+fcorvals = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/sds/SDS_BJK_ancreg_replication_1kblocks.txt"
+#fcorvals_eur = "/data/clusterfs/lag/users/gokala/enigma-evol/sds/SDS_bjk_ancreg_1kblocks_replication2.csv"
 fjason_corvals = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/sds/SDS_bjk_ancreg_1kblocks_fromJason.csv"
-corvals = read.csv(fcorvals,stringsAsFactors=F)
-corvals_eur = read.csv(fcorvals_eur,stringsAsFactors=F)
-jason_corvals = read.csv(fjason_corvals,stringsAsFactors=F)
+corvals = read.table(fcorvals,header = T)
+#corvals_eur = read.csv(fcorvals_eur)
+jason_corvals = read.csv(fjason_corvals)
 
 hist(jason_corvals$BJK_ESTIM_AVE)
-hist(corvals$BJK_ESTIM_)
+hist(as.numeric(corvals$BJK_ESTIM_AVE))
 
 ## Pick relevant rows and columns from raw SDS outputs
 
@@ -24,12 +26,17 @@ jason_corvals$mergeCol = sapply(jason_corvals$X,function (x) {unlist(strsplit(x,
 
 # Prep White British replication results
 
-brit_surface = corvals %>%
-  filter(grepl("(?=.*surfaceDK)(?=.*_globalCov)",corvals$X,perl=TRUE)) %>%
-  select(X, BJK_ESTIM_AVE, BJK_ESTIM_PVAL)
+thisSA1 = corvals[grep("surf",corvals$X),]
+thisSA = corvals[grep("withGlob",thisSA1$X),]
+thisSA[nrow(thisSA)+1,] = corvals[grep("Full",thisSA1$X),]
+brit_surface = thisSA[,c(1,3,6)]
+brit_surface$BJK_ESTIM_AVE = as.numeric(brit_surface$BJK_ESTIM_AVE)
+#brit_surface = corvals %>%
+#  filter(grepl("(?=.*surface)(?=.*_withGlob)",corvals$X,perl=TRUE)) %>%
+#  select(X, BJK_ESTIM_AVE, BJK_ESTIM_PVAL)
 
-brit_surface$X[8]="Mean_Full_Surface"
-brit_surface=brit_surface[-9,] #remove globScaled row, because it is replicate of Mean_Full_Surface
+#brit_surface$X[8]="Mean_Full_Surface"
+#brit_surface=brit_surface[-9,] #remove globScaled row, because it is replicate of Mean_Full_Surface
 brit_surface$mergeCol=sapply(brit_surface$X,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]})
 e3_brit = merge(jason_corvals,brit_surface,by="mergeCol")
 
@@ -39,21 +46,21 @@ e3_brit = merge(jason_corvals,brit_surface,by="mergeCol")
 #brit_thickness$mergeCol=sapply(brit_thickness$X,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]})
 
 # Prep Eur replication results
-eur_surface = corvals_eur %>%
-  filter(grepl("(?=.*surfaceDK)",corvals_eur$X,perl=TRUE)) %>%
-  select(X, BJK_ESTIM_Z, BJK_ESTIM_PVAL)
+#eur_surface = corvals_eur %>%
+#  filter(grepl("(?=.*surfaceDK)",corvals_eur$X,perl=TRUE)) %>%
+#  select(X, BJK_ESTIM_Z, BJK_ESTIM_PVAL)
 
-eur_surface$X[8]="Mean_Full_Surface"
-eur_surface=eur_surface[-9,] #remove globScaled row, because it is replicate of Mean_Full_Surface
-eur_surface$mergeCol=sapply(eur_surface$X,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]})
-e3_eur = merge(jason_corvals,eur_surface,by="mergeCol")
+#eur_surface$X[8]="Mean_Full_Surface"
+#eur_surface=eur_surface[-9,] #remove globScaled row, because it is replicate of Mean_Full_Surface
+#eur_surface$mergeCol=sapply(eur_surface$X,function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]})
+#e3_eur = merge(jason_corvals,eur_surface,by="mergeCol")
 
 # Correlation plots
 ggscatter(e3_brit, x = "BJK_ESTIM_AVE.x", y = "BJK_ESTIM_AVE.y", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
-          xlab = "E3", ylab = "White British subset", title = "Correlation-coefficient comparison (surface area)")
-ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/sds/surface_e3_vs_britSub_scatter_corCoef.pdf",width=7,height=7)
+          xlab = "E3", ylab = "White British subset", title = "SDS estimated average corcoef. comparison (surface area)")
+ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/sds/surface_e3_vs_replication_scatter_corCoef.pdf",width=7,height=7)
 
 ggscatter(e3_eur, x = "BJK_ESTIM_Z.x", y = "BJK_ESTIM_Z.y", 
           add = "reg.line", conf.int = TRUE, 

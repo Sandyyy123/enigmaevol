@@ -114,7 +114,6 @@ if (length(unique(globalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
 }
 
 #--------------------------------------------------#
-# FUNCTIONS
 
 # Full surface area (RIGHT HEM.)
 # Start by getting all the clumped SNPs only for full surface area
@@ -175,7 +174,7 @@ if (length(unique(globalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
   mart = useMart(biomart="ENSEMBL_MART_ENSEMBL",dataset="hsapiens_gene_ensembl",host="feb2014.archive.ensembl.org")
   geneannot = getBM(attributes = c("ensembl_gene_id","hgnc_symbol","gene_biotype"),filters="ensembl_gene_id",values=eqtlgenes,mart=mart)
   cat('These eQTLs impact ',length(which(geneannot=="protein_coding")),' protein-coding eGenes\n')
-  write.csv(geneannot,file=paste0(outDir,"/rightHem_",annot_name,"european_lr.csv"),row.names=FALSE,quote=FALSE)
+  write.csv(geneannot,file=paste0(outDir,"/rightHem_SA_",annot_name,"european_lr.csv"),row.names=FALSE,quote=FALSE)
   
 } else {
   print("There are not any CSA-associated variant - eQTL overlap")
@@ -183,11 +182,11 @@ if (length(unique(globalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
 
 #--------------------------------------------------#
 
-# All regional surface areas
+# All regional surface areas (LEFT HEM.)
 # Start by getting all the clumped SNPs only for any regional surface area
 
 
-surfareaind = grep("surface",phenoname)
+surfareaind = grep("surface_le",phenoname) 
 surfareaind = surfareaind[-7] #TODO Find a proper way to exclude Full Surface area index here!
 
 # Loop over all regions
@@ -245,8 +244,78 @@ if (length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
   mart = useMart(biomart="ENSEMBL_MART_ENSEMBL",dataset="hsapiens_gene_ensembl",host="feb2014.archive.ensembl.org")
   geneannot = getBM(attributes = c("ensembl_gene_id","hgnc_symbol","gene_biotype"),filters="ensembl_gene_id",values=eqtlgenes,mart=mart)
   cat('These eQTLs impact ',length(which(geneannot=="protein_coding")),' protein-coding eGenes\n')
-  write.csv(geneannot,file=paste0(outDir,"/regionalSA_",annot_name,"_european_lr.csv"),row.names=FALSE,quote=FALSE)
+  write.csv(geneannot,file=paste0(outDir,"/regionalSA_le_",annot_name,"_european_lr.csv"),row.names=FALSE,quote=FALSE)
 
+} else {
+  print("There are not any CSA-associated variant - eQTL overlap")
+}
+
+#--------------------------------------------------#
+
+# All regional surface areas (RIGHT HEM.)
+# Start by getting all the clumped SNPs only for any regional surface area
+
+
+surfareaind = grep("surface_re",phenoname) 
+surfareaind = surfareaind[-7] #TODO Find a proper way to exclude Full Surface area index here!
+
+# Loop over all regions
+for (j in 1:length(surfareaind)) {
+  if (j==1) {
+    clump = read.table(clumpfileloc[surfareaind[7]],header=TRUE)
+  } else {
+    if (file.exists(clumpfileloc[surfareaind[j]])) {
+      clump = rbind(clump,read.table(clumpfileloc[surfareaind[j]],header=TRUE))
+    }
+  }
+}
+
+# Loop over all SNPs
+for (i in 1:nrow(clump)) {
+  
+  # Find all SNPs in LD (r2>0.6) with each clumped SNP
+  system(paste0("module load plink/1.9b6 \
+                    plink --bfile /data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/plink/1KG_phase3_GRCh37_EUR_nonFIN_allchr --r2 --ld-window-kb 10000 --ld-window 2000 --ld-window-r2 0.6 --ld-snp ",clump$SNP[i]," --out reg_tmpld_",annot_name))
+  
+  # Read in the LD calculated from plink
+  LD = read.table(paste0("reg_tmpld_",annot_name,".ld"),header=TRUE)
+  
+  # Turn into a genomic ranges object
+  if (i==1) { 
+    LDSNPs = GRanges(LD$CHR_B,IRanges(LD$BP_B,LD$BP_B),SNP=LD$SNP_B,indexSNP=LD$SNP_A)
+  } else {
+    LDSNPs = c(GRanges(LD$CHR_B,IRanges(LD$BP_B,LD$BP_B),SNP=LD$SNP_B,indexSNP=LD$SNP_A),LDSNPs)
+  }
+}
+
+# Make sure that all index SNPs are in this list
+LDSNPs = c(GRanges(clump$CHR,IRanges(clump$BP,clump$BP),SNP=clump$SNP,indexSNP=clump$SNP),LDSNPs)
+
+#save(LDSNPs,file="RegionalLDSNPs.Rdata")
+
+# Find overlaps
+olap = findOverlaps(annotGR,LDSNPs)
+regionalSASNPsolapHGE = unique(LDSNPs$indexSNP[subjectHits(olap)])
+regionalAnnot = LDSNPs[which(!is.na(match(LDSNPs$indexSNP,regionalSASNPsolapHGE)))]
+
+# Outputting the number of loci that overlap with an HGE
+cat('Number of loci that overlap with ',annot_name,' is: ',length(unique(regionalAnnot$indexSNP)),'\n')
+
+olap2 = findOverlaps(eqtl.GR,regionalAnnot)
+cat('Number of ',annot_name,' overlapping loci that also have an eQTL: ',length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])),'\n')
+eqtlgenes = unique(eqtl.GR$gene_id[queryHits(olap2)])
+
+# Remove the . annotation
+eqtlgenes = sapply(eqtlgenes,function (x) {unlist(strsplit(x,".",fixed=TRUE))[1]})
+
+if (length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
+  
+  # Convert these genes to hgnc_id
+  mart = useMart(biomart="ENSEMBL_MART_ENSEMBL",dataset="hsapiens_gene_ensembl",host="feb2014.archive.ensembl.org")
+  geneannot = getBM(attributes = c("ensembl_gene_id","hgnc_symbol","gene_biotype"),filters="ensembl_gene_id",values=eqtlgenes,mart=mart)
+  cat('These eQTLs impact ',length(which(geneannot=="protein_coding")),' protein-coding eGenes\n')
+  write.csv(geneannot,file=paste0(outDir,"/regionalSA_ri_",annot_name,"_european_lr.csv"),row.names=FALSE,quote=FALSE)
+  
 } else {
   print("There are not any CSA-associated variant - eQTL overlap")
 }

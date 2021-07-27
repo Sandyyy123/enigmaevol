@@ -17,7 +17,7 @@ annots = list.dirs(path = "/data/clusterfs/lag/users/gokala/enigma-evol/data/eur
 #i=2
 for (i in 1:length(annots)){
       print(annots[i])
-      files = Sys.glob(path = paste0("/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/munged/results/",annots[i],"/right/*.gz.results"))
+      files = Sys.glob(path = paste0("/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/munged/results/",annots[i],"/left/*.gz.results"))
       partheritresults = data.frame(Category = character(0),
                                     Prop._SNPs= numeric(0),
                                     Prop._h2= numeric(0),
@@ -45,6 +45,6 @@ for (i in 1:length(annots)){
       partheritresults$annot.p <- if_else(partheritresults$fdr < 0.05, as.character(round(partheritresults$fdr, digits = 4)), "")
       partheritresults$significant = if_else(partheritresults$fdr < 0.05, "Yes", "")
       write.table(partheritresults, 
-                  paste0("/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/munged/results_tables/right/",unique(partheritresults$Annotation),"_results_FDR34.txt"),
+                  paste0("/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/munged/results_tables/left/",unique(partheritresults$Annotation),"_results_FDR34.txt"),
                   sep = "\t", col.names = TRUE, row.names = TRUE, quote = FALSE)
 }

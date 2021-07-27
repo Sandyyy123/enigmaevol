@@ -1,23 +1,27 @@
-options(stringsAsFactors=FALSE);
-library(plotly);
-library(gplots);
+options(stringsAsFactors=FALSE)
+library(plotly)
+library(gplots)
 #setwd('~/Documents/papers/ENIGMA-Evolution/RegionalPlottingFreesurfer');
 
 ##Load in all the Freesurfer surfaces
 #freesurfer="/data/clusterfs/lag/users/gokala/enigma-evol/sds/FreesurferRegionalObjs.Rdata"
-load("/data/clusterfs/lag/users/gokala/enigma-evol/sds/FreesurferRegionalObjs.Rdata")
+load("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/old_results/sds/FreesurferRegionalObjs.Rdata")
 
 ##Correlations with SDS scores at different thresholds
 #Set colorbar values
 minZ = -0.0165;
 maxZ = 0.0165;
     
-fcorvals = ("/data/clusterfs/lag/users/gokala/enigma-evol/sds/SDS_bjk_ancreg_1kblocks.csv")
-corvals = read.csv(fcorvals);
-thisSA = corvals[grep("surf",corvals$X),];
+fcorvals = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/sds/SDS_BJK_ancreg_replication_1kblocks.txt"
+corvals = read.table(fcorvals)
+thisSA1 = corvals[grep("surf",corvals$X),]
+thisSA = corvals[grep("withGlob",thisSA1$X),]
+thisSA[nrow(thisSA)+1,] = corvals[grep("Full",thisSA1$X),]
 thisSA$region = paste(sapply(as.character(thisSA$X),function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]}),sapply(as.character(thisSA$X),function (x) {unlist(strsplit(x,"_",fixed=TRUE))[3]}),sep="_")
 #thisSA = thisSA[-grep("_no",thisSA$region),]
-thisTH = corvals[grep("thick",corvals$X),];
+thisTH1 = corvals[grep("thick",corvals$X),];
+thisTH = corvals[grep("withGlob",thisTH1$X),];
+thisTH[nrow(thisTH)+1,] = corvals[grep("Full",thisTH1$X),]
 thisTH$region = sapply(as.character(thisTH$X),function (x) {unlist(strsplit(x,"_",fixed=TRUE))[2]});
 
 ##Take only the left hemisphere obj files (everything in ENIGMA is mean bilateral)

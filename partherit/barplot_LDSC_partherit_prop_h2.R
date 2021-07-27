@@ -25,13 +25,13 @@ library(scales)
 options(stringsAsFactors=FALSE)
 
 regionordering <- read.csv("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/freesurfer_orderandcolor.csv")
-annots = list.files(path = "/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/munged/results_tables/right/", full.names = F,recursive = F)
+annots = list.files(path = "/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/munged/results_tables/left/", full.names = F,recursive = F)
 
 for (i in 1:length(annots)){
 
   print(annots[i])
   annotname = str_split(annots[i], pattern = "\\.")[[1]][1]
-  resultsFile <- paste0("/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/munged/results_tables/right/",annots[i])
+  resultsFile <- paste0("/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/munged/results_tables/left/",annots[i])
   results <- read.table(resultsFile[1], header = TRUE, sep = "\t")
   results$Region <- factor(results$Region, levels = regionordering$Region)
 
@@ -75,7 +75,7 @@ pSA = ggplot(data = results[results$Analysis == "Surface Area", ], mapping = aes
   )
 
 pSA = pSA + geom_text(data = label.df1, label = "*") #,size=5
-ggsave(paste0("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/plots/h2_prop/european_lr/right/",annotname,"_h2_Prop_SA.pdf"), plot = pSA, width = 7.5, height = 3.25, units = "in", dpi=700)
+ggsave(paste0("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/plots/h2_prop/european_lr/left/",annotname,"_h2_Prop_SA.pdf"), plot = pSA, width = 7.5, height = 3.25, units = "in", dpi=700)
 
 y_max2 <- max(results[results$Analysis == "Thickness", 3])
 y_axis_max2 <- y_max2 + results[results$Prop._h2 == y_max2, 4] + 0.02
@@ -98,5 +98,5 @@ pTH = ggplot(data = results[results$Analysis == "Thickness", ], mapping = aes(Re
   )
 
 pTH = pTH + geom_text(data = label.df2, label = "*") #, size=5
-ggsave(paste0("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/plots/h2_prop/european_lr/right/",annotname,"_h2_Prop_TH.pdf"), plot = pTH, width = 7.5, height = 3.25, units = "in", dpi=700)
+ggsave(paste0("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/plots/h2_prop/european_lr/left/",annotname,"_h2_Prop_TH.pdf"), plot = pTH, width = 7.5, height = 3.25, units = "in", dpi=700)
 }
