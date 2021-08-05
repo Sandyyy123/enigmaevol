@@ -7,14 +7,15 @@ args = commandArgs(trailingOnly=TRUE)
 # 3- Run plink on control variants to expand control sets.
 # 4- Pick random variants in LD with controls.
 #
-# Run this script with R 4.0.3
+# Run this script with R 4.0.3, so that biomaRt works
+# properly.
 #
 # Gokberk Alagoz
 # created on: 02.06.2021
 
 #####
 
-#library(biomaRt)
+library(biomaRt)
 library(data.table)
 options(stringsAsFactors=FALSE)
 
@@ -72,33 +73,6 @@ get_num_LD_buddies = function(clumpedDir, outDir) { #TODO this prints 2 extra li
     system(paste0("awk '{print $1\":\"$4\"\t\"$3\"\t\"$6}' ", i, " > ", paste0(outDir,"/",file_name_base,"_LDbuddy_counts.txt"))) #TODO use column names instead of field numbers
   }
 }
-
-#get_rsIDs_from_pos = function() { # instead of this, download annotations from SNPsnap
-#                                  # when generating the control variants.
-#  # read control variants, convert variants IDs
-#  # (chr:pos) to rsIDs
-#  controlVarIDs_table = read.table(controlVarIDs,header = T)
-#  controlVar_rsIDs_table = data.frame(matrix(NA,
-#                                             nrow = nrow(controlVarIDs_table),
-#                                             ncol = ncol(controlVarIDs_table)))
-#  colnames(controlVar_rsIDs_table) = colnames(controlVarIDs_table)
-#  controlVar_rsIDs_table[,1] = controlVarIDs_table$Input_SNP
-#  for (i in 1:nrow(controlVarIDs_table)) {
-#    for (j in 1:ncol(controlVarIDs_table)) {
-#      tmp_chr = as.numeric(strsplit(controlVarIDs_table[i,j],":",fixed=TRUE)[[1]][1])
-#      tmp_pos = as.numeric(strsplit(controlVarIDs_table[i,j],":",fixed=TRUE)[[1]][2])
-#      snpmart = useMart("ENSEMBL_MART_SNP", 
-#                        dataset = "hsapiens_snp", 
-#                        path="/biomart/martservice", 
-#                        host="https://grch37.ensembl.org")
-#      tmp_rsID = getBM("refsnp_id", 
-#                       filters = c("chr_name","start","end"), 
-#                       values = list(tmp_chr,tmp_pos,tmp_pos), 
-#                       mart = snpmart)
-#      controlVar_rsIDs_table[i,j] = tmp_rsID[1,1]
-#    }
-#  }
-#}
 
 #run_plink_ld = function(genotypeFile, controlVars, outDir) {
 #  # runs plink --ld in control snps
@@ -172,7 +146,7 @@ extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDb
     if (working_indeces$TOTAL[i]!=0) {
       # Feed in the lead SNP and its LD-buddies to
       # the first line.
-      tmp_mat[1,1] = working_indeces[i,2]
+      tmp_mat[1,1] = working_indeces[i,1]
       tmp_mat[1,2:ncol(tmp_mat)] = as.vector(strsplit(working_indeces[i,4], ","))[[1]]
       
       # Feed in the control variants and their LD-
@@ -180,12 +154,12 @@ extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDb
       k = 2
       for (j in 1:(length(controlLDbuddies))) {
         tmp_controls = read.table(controlLDbuddies[j], header = T)
-        tmp_mat[k,1] = tmp_controls$SNP_A[1]
-        tmp_mat[k,2:ncol(tmp_mat)] = tmp_controls$SNP_B[1:working_indeces$TOTAL[i]]
+        tmp_mat[k,1] = paste0(tmp_controls$CHR_A[1],":",tmp_controls$BP_A[1])
+        tmp_mat[k,2:ncol(tmp_mat)] = paste0(tmp_controls$CHR_B[1:working_indeces$TOTAL[i]],":",tmp_controls$BP_B[1:working_indeces$TOTAL[i]])
         k = k + 1
       }
       
-      # Remove rows with NAs and SNPs with 2 rsIDs (e.g. "rsID123;rsID345")
+      # Remove rows with NAs and SNPs with 2 markers (e.g. "12:123123;7:456456")
       
       tmp_df = as.data.frame(tmp_mat)
       tmp_df = na.omit(tmp_df)
@@ -195,6 +169,25 @@ extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDb
           tmp_df = tmp_df[-l,]
         }
       }
+      
+      # LD buddies of dear lead SNPs have only rsIDs. We have to convert them to 
+      # markers to get the evol measures in the next step.
+      
+      for (m in 2:ncol(tmp_df)) {
+        
+        snpmart = useMart("ENSEMBL_MART_SNP", 
+                          dataset = "hsapiens_snp", 
+                          path="/biomart/martservice", 
+                          host="https://grch37.ensembl.org")
+        tmp_marker = getBM(attributes = c("chr_name","chrom_start","chrom_end"), 
+                         filters = "snp_filter", 
+                         values = tmp_df[1,m], #list(tmp_chr,tmp_pos,tmp_pos), 
+                         mart = snpmart)
+        tmp_df[1,m] = paste0(tmp_marker[1,1],":",tmp_marker[1,2])
+      }
+      
+      # Remove rows with NAs
+      #tmp_df = na.omit(tmp_df)
       
       write.table(tmp_df, file = paste0(outDir, "/", working_indeces[i,2], ".txt")
                   , quote = F, row.names = F, col.names = F, sep = "\t")
@@ -203,16 +196,16 @@ extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDb
       # If the lead SNP doesn't have any LD-buddies, things work
       # slightly differently.
       
-      tmp_mat[1,1] = working_indeces[i,2]
+      tmp_mat[1,1] = working_indeces[i,1]
       
       k = 2
       for (j in 1:(length(controlLDbuddies))) {
         tmp_controls = read.table(controlLDbuddies[j], header = T)
-        tmp_mat[k,1] = tmp_controls$SNP_A[1]
+        tmp_mat[k,1] = paste0(tmp_controls$CHR_A[1],":",tmp_controls$BP_A[1])
         k = k + 1
       }
       
-      # Remove rows with NAs and SNPs with 2 rsIDs (e.g. "rsID123;rsID345")
+      # Remove rows with NAs and SNPs with 2 markers (e.g. "12:123123;7:456456")
       
       tmp_df = as.data.frame(tmp_mat)
       tmp_df = na.omit(tmp_df)
@@ -222,18 +215,13 @@ extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDb
           tmp_df = tmp_df[-l,]
         }
       }
-      
-      write.table(tmp_df, file = paste0(outDir, "/", working_indeces[i,2], ".txt")
+            
+      write.table(tmp_df, file = paste0(outDir, "/CSAregions/", working_indeces[i,2], ".txt")
                   , quote = F, row.names = F, col.names = F, sep = "\t")
     }
     
   }
-  
-}
-
-get_evol_measures = function(leadSNPlist, evolMeasures) {
-  # 
-  
+  #TODO output files has lots of "NA:NA"s and corrupt elements. Find a way to fix it.
 }
 
 #--------------------------------------------
@@ -259,5 +247,8 @@ get_evol_measures = function(leadSNPlist, evolMeasures) {
 
 #run_plink_ld(genotypeFile,controlVars,outDir)
 
+#extract_leadSNP_info(clumpedDir, leadSNPlist, controlVars, controlLDbuddies, outDir)
+
 #--------------------------------------------
+
 sessionInfo()
