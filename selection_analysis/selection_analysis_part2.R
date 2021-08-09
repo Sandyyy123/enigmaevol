@@ -82,7 +82,7 @@ sort_bed = function(outDir) {
   }
 }
 
-intersect_varBed_vs_annotBed = function(annots, outDir) {
+intersect_varBed_vs_annotBed = function(annots, outDir) { #TODO this takes ages. parallelize over chr and lead SNPs.
   # This function intersects annotation and variant
   # bed files using bedtools.
   for (annot_folder in annots) {
@@ -111,18 +111,61 @@ merge_sort_filter = function(CSAregions, outDir) {
   for (i in dir(CSAregions)) {
     tmp_lead_snp = strsplit(i, split = "\\.")[[1]][1]
     
-    for (annot_folder in annots) {
+    #for (annot_folder in annots) {
       annot_name = strsplit(annot_folder, split = "_")[[1]][4]
       
+      # merge all chromosomes for each lead snp (ignore X and Y chrs)
       for (j in 1:22) {
         system(paste0("cat ", outDir, "/intersects/", tmp_lead_snp, "_chr", j, 
-                      annot_name, ".intersect.bed >> ", tmp_lead_snp, ".allChr.", 
-                      annot_name, "intersect.bed"))
+                      annot_name, ".intersect.bed >> ", outDir, "/intersects/", 
+                      tmp_lead_snp, ".allChr.", 
+                      annot_name, ".intersect.bed"))
       }
-      system(paste0("sort -k4 -n ", tmp_lead_snp, ".allChr.", annot_name, 
-                    "intersect.bed"))
+
+      # read the merged bed file
+      tmp_bed = read.table(paste0(outDir, "/intersects/", tmp_lead_snp, 
+                                  ".allChr.", annot_name, ".intersect.bed"))
+      
+      # split the locus index and evol. measure column (index|measure) into 2 columns
+      for (k in 1:nrow(tmp_bed)) {
+        tmp_bed$V6[k] = as.numeric(strsplit(tmp_bed$V5[k], split = "\\|")[[1]][2])
+        tmp_bed$V5[k] = as.numeric(strsplit(tmp_bed$V5[k], split = "\\|")[[1]][1])
+      }
+
+      # sort snps based on which loci they come from
+      tmp_bed = tmp_bed[order(tmp_bed$V5),]
+      rownames(tmp_bed) = 1:nrow(tmp_bed)
+      
+      # count LD-buddies of each lead snp which are not NaN
+      lead_snp_nonNaN_ldbuddy_count = nrow(tmp_bed[tmp_bed$V5==1,]) - sum(is.na(tmp_bed[tmp_bed$V5==1,]$V6))
+      
+      drop_count = 0
+      # if a locus' coverage is less than 90%, drop that locus
+      for (l in levels(as.factor(tmp_bed$V5))) {
+        tmp_snp_coverage =  (nrow(tmp_bed[tmp_bed$V5==l,]) - sum(is.na(tmp_bed[tmp_bed$V5==l,]$V6))) / lead_snp_nonNaN_ldbuddy_count
+        
+        if (tmp_snp_coverage <= 0.9) {
+          tmp_bed = tmp_bed[-c(as.numeric(rownames(tmp_bed[tmp_bed$V5==l,]))),]
+          drop_count = drop_count + 1
+        }
+      }
+      
+      # if more than 60% of control loci are dropped, don't use that lead snp
+      if ((drop_count / length(levels(as.factor(tmp_bed$V5)))) >= 0.6) {
+        tmp_bed = print(paste0("Too many control regions have missing evol. measures,
+                        Thus the lead SNP itself was dropped."))
+      }
+      
+      write.table(tmp_bed, file = paste0(outDir, "/intersects/", tmp_lead_snp, 
+                                         ".allChr.", annot_name, ".intersect.sorted.filtered.bed"), 
+                  quote = F, row.names  = F, col.names = F, sep = "\t")
+      
     }
-  }
+  #}
+}
+
+get_median_and_distribute = function(outDir) {
+  
 }
 
 #--------------------------------------------
