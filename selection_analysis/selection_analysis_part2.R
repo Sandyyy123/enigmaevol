@@ -21,12 +21,11 @@ options(stringsAsFactors=FALSE)
 #--------------------------------------------
 # PATHS
 
-#leadSNPlist = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave/working_snps.txt"
 CSAregions = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave/CSAregions"
 outDir = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave"
 resources = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/"
-phylop = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/primates.phyloP46way.bed"
-phastcons = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/primates.phastCons46way.bed"
+annots=c("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/primate_phyloP",
+         "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/primate_phastCons")
 
 #--------------------------------------------
 # FUNCTIONS
@@ -79,22 +78,50 @@ sort_bed = function(outDir) {
     tmp = read.table(paste0(outDir, "/variant_beds/", rsID, ".sorted.bed"))
     tmp$V4 = rownames(tmp)
     write.table(tmp, file = paste0(outDir, "/variant_beds/", rsID, ".sorted.bed"), 
-                quote = F, row.names = F, col.names = F, sep = "\t")
+                quote = F, row.names  = F, col.names = F, sep = "\t")
   }
 }
 
-intersect_varBed_vs_annotBed = function(outDir) {
+intersect_varBed_vs_annotBed = function(annots, outDir) {
   # This function intersects annotation and variant
   # bed files using bedtools.
-  
-  for (i in dir(paste0(outDir,"/variant_beds"), full.names = T, pattern = "sorted")) {
+  for (annot_folder in annots) {
+    
+    annot_name = strsplit(annot_folder, split = "_")[[1]][4]
+    for (i in dir(paste0(outDir,"/variant_beds"), full.names = T, pattern = "sorted")) {
       
-    fileName = sapply(strsplit(i, split = "/"), tail, 1)
-    rsID = strsplit(fileName, split = "\\.")[[1]][1]
-    system(paste0("module load bedtools/2.29.2 \
-                  bedmap --echo --echo-map-score ", i, " ", phylop,
-                  " > ", outDir, "/intersects/", rsID,
-                  ".intersect.txt"))
+      fileName = strsplit(i, split = "/")[[1]][15]
+      rsID = strsplit(fileName, split = "\\.")[[1]][1]
+      system(paste0("module load bedtools/2.29.2 \
+                  cd ", annot_folder," \
+                  for i in `seq 1 22` X Y; \
+                    do \
+                      annot=\"chr${i}.",annot_name,"46way.primate.starch\"; \
+                      bedmap --echo --mean --chrom chr${i} ", i, " ", annot_folder, "/${annot}",
+                    " > ", outDir, "/intersects/", rsID, "_chr${i}", annot_name,
+                    ".intersect.bed; \
+                    done"))
+    }
+  }
+}
+
+
+merge_sort_filter = function(CSAregions, outDir) {
+  
+  for (i in dir(CSAregions)) {
+    tmp_lead_snp = strsplit(i, split = "\\.")[[1]][1]
+    
+    for (annot_folder in annots) {
+      annot_name = strsplit(annot_folder, split = "_")[[1]][4]
+      
+      for (j in 1:22) {
+        system(paste0("cat ", outDir, "/intersects/", tmp_lead_snp, "_chr", j, 
+                      annot_name, ".intersect.bed >> ", tmp_lead_snp, ".allChr.", 
+                      annot_name, "intersect.bed"))
+      }
+      system(paste0("sort -k4 -n ", tmp_lead_snp, ".allChr.", annot_name, 
+                    "intersect.bed"))
+    }
   }
 }
 
