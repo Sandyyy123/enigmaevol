@@ -138,14 +138,15 @@ merge_sort_filter = function(CSAregions, outDir) {
       
       # count LD-buddies of each lead snp which are not NaN
       lead_snp_nonNaN_ldbuddy_count = nrow(tmp_bed[tmp_bed$V5==1,]) - sum(is.na(tmp_bed[tmp_bed$V5==1,]$V6))
-      
+
       drop_count = 0
-      # if a locus' coverage is less than 90%, drop that locus
+      # iterate over control sets. if a locus' coverage is less than 90%, drop that locus.
       for (l in levels(as.factor(tmp_bed$V5))) {
         tmp_snp_coverage =  (nrow(tmp_bed[tmp_bed$V5==l,]) - sum(is.na(tmp_bed[tmp_bed$V5==l,]$V6))) / lead_snp_nonNaN_ldbuddy_count
         
-        if (tmp_snp_coverage <= 0.9) {
-          tmp_bed = tmp_bed[-c(as.numeric(rownames(tmp_bed[tmp_bed$V5==l,]))),]
+        if (tmp_snp_coverage <= 0.9 && nrow(tmp_bed[tmp_bed$V5==l,]) != 0) {
+          # no need to drop these control regions! only count them.
+          #tmp_bed = tmp_bed[-c(as.integer(rownames(tmp_bed[tmp_bed$V5==l,]))),]
           drop_count = drop_count + 1
         }
       }
@@ -165,6 +166,65 @@ merge_sort_filter = function(CSAregions, outDir) {
 }
 
 get_median_and_distribute = function(outDir) {
+  # get the median evol measure from each set.
+  # plot the distribution, run a test between CSA-region evol. score and
+  # the rest. see if it's significantly high/low.
+  
+  csa_regions_summary = data.frame(lead_snp = character(),
+                                   z_score = numeric(),
+                                   pval = numeric(),
+                                   mean = numeric(),
+                                   median = numeric(),
+                                   std = numeric(),
+                                   lead_snp_percentile = numeric(),
+                                   test_type = character())
+  lead_snp_count = 1
+  for (f in dir(paste0(outDir, "/intersects/"), pattern = ".intersect.sorted.filtered.bed", full.names = T)) {
+    tmp_bed = read.table(f)
+    median_df = data.frame(set_n = numeric(), 
+                           median_score = numeric())
+    
+    k = 1
+    for (set_n in levels(as.factor(tmp_bed$V5))) {
+      median_df[k,1] = as.numeric(set_n)
+      median_df[k,2] = median(tmp_bed[tmp_bed$V5==set_n,]$V6)
+      k = k + 1
+    }
+    
+    median_df = na.omit(median_df)
+    hist(median_df$median_score)
+    
+    z_score = (median_df[median_df$set_n=="1",]$median_score - mean(median_df$median_score)) / sd(median_df$median_score)
+    
+    control_vars = median_df[-1,]
+    percentile = ecdf(control_vars$median_score)
+    lead_snp_percentile = percentile(median_df$median_score[1])
+    
+    pvalue = nrow(control_vars[control_vars$median_score >= median_df$median_score[1],]) / nrow(control_vars)
+    
+    if (pvalue > 0.5) {
+      pvalue = nrow(control_vars[control_vars$median_score <= median_df$median_score[1],]) / nrow(control_vars)
+      pvalue = 2 * pvalue
+      test_type = "two-tailed"
+    }
+    else {
+      test_type = "greater-than"
+    }
+
+    csa_regions_summary[lead_snp_count,1] = strsplit(strsplit(f, split = "/")[[1]][16], split = "\\.")[[1]][1]
+    csa_regions_summary[lead_snp_count,2] = z_score
+    csa_regions_summary[lead_snp_count,3] = pvalue
+    csa_regions_summary[lead_snp_count,4] = mean(median_df$median_score)
+    csa_regions_summary[lead_snp_count,5] = median(median_df$median_score)
+    csa_regions_summary[lead_snp_count,6] = sd(median_df$median_score)
+    csa_regions_summary[lead_snp_count,7] = lead_snp_percentile
+    csa_regions_summary[lead_snp_count,8] = test_type
+
+    lead_snp_count = lead_snp_count + 1
+  }
+  
+  write.table(csa_regions_summary, paste0(outDir, "/selection_analysis_summary.txt"),
+              quote = F, row.names = F, col.names = F, sep = "\t")
   
 }
 

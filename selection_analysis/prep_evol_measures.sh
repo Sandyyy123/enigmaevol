@@ -23,8 +23,8 @@ wig2bed < primates.phastCons46way.wig > primates.phastCons46way.bed
 
 ###########################
 # Full bigWig files which should contain all chromosomes seem to have only
-# chr9, chrX and chrY. So I'll try independent chr files version of phastCons
-# and phyloP scores.
+# chr9, chrX and chrY. So, download each chr file independently for both phastCons
+# and phyloP. Codes below do it.
 
 # Download data
 rsync -avz --progress rsync://hgdownload.cse.ucsc.edu/goldenPath/hg19/phyloP46way/primates /path/to/dir
