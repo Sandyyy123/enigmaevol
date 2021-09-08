@@ -1,8 +1,5 @@
 #!/bin/sh
-#$ -N ldsc_munge
-#$ -cwd
-#$ -q single.q
-#$ -S /bin/bash
+# Gokberk Alagoz, 2020
 
 #-----Munge Sumstats-----
 
@@ -14,9 +11,9 @@
 # $input - summary statistic file
 # $output - outfile_name
 
-inDir="/data/clusterfs/lag/users/gokala/enigma-evol/data/european_hemave/"
-outDir="/data/clusterfs/lag/users/gokala/enigma-evol/data/european_hemave/munged/"
-sumstatsList="/data/clusterfs/lag/users/gokala/enigma-evol/data/european_hemave/sumstats_txt_list.txt"
+inDir="/data/clusterfs/lag/users/gokala/enigma-evol/data/replication/thickness/"
+outDir="/data/clusterfs/lag/users/gokala/enigma-evol/data/replication/thickness/munged/"
+sumstatsList="/data/clusterfs/lag/users/gokala/enigma-evol/data/replication/thickness/sumstats_txt_list.txt"
 
 #-----
 
@@ -31,7 +28,7 @@ while read line; do
    LINE=$line
    tmp_base_name=$(basename "$line")
    echo $tmp_base_name
-   pheno_name="$(cut -d'_' -f4,5 <<<"$tmp_base_name")"
+   pheno_name="$(cut -d'_' -f5 <<<"$tmp_base_name")"
    echo $pheno_name
    tmp_run_file="${inDir}scripts/${pheno_name}.sh"
    output="${outDir}${tmp_base_name%.txt}_munged.txt"
@@ -39,7 +36,7 @@ while read line; do
    echo '#!/bin/sh
 #$ -N munge_sumstats
 #$ -cwd
-#$ -q multi.q
+#$ -q multi15.q
 #$ -S /bin/bash
 
 echo '$LINE'
@@ -55,4 +52,4 @@ done < $sumstatsList
 
 echo "Finished!"
 
------
+#-----

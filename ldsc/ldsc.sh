@@ -17,10 +17,10 @@
 # $rw - LD Scores to use for the regression weights
 # For this analysis, same file is used as iv and rw -> eur_w_ld_chr
 
-inDir="/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_txt/replication/munged/thickness/"
-outDir="/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/replication/ancreg_intercepts/thickness/"
+inDir="/data/clusterfs/lag/users/gokala/enigma-evol/data/replication/thickness/munged/"
+outDir="/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/replication/nonancreg_intercepts/thickness/"
 iv_rw="/data/workspaces/lag/shared_spaces/Resource_DB/LDscores/eur_w_ld_chr/"
-mungedSumstatsList="/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_txt/replication/munged/thickness/munged_sumstats_list.txt"
+mungedSumstatsList="/data/clusterfs/lag/users/gokala/enigma-evol/data/replication/thickness/munged/munged_sumstats_list.txt"
 
 #-----
 mkdir "${inDir}scripts"
@@ -37,7 +37,7 @@ while read line; do
    echo $line
    tmp_base_name=$(basename "$line")
    echo $tmp_base_name
-   pheno_name="$(cut -d'_' -f2 <<<"$tmp_base_name")"
+   pheno_name="$(cut -d'_' -f5 <<<"$tmp_base_name")"
    echo $pheno_name
    output="${outDir}${pheno_name}"
    tmp_run_file="${inDir}scripts/${pheno_name}.sh"

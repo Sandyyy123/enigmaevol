@@ -1,8 +1,8 @@
 library(tidyverse)
 library(here)
 
-files <- list.files("/data/clusterfs/lag/users/gokala/dyslexia-evol/ldsc/ancreg_intercepts/", full.names = T, include.dirs = F, pattern = ".log")
-files_wo <- list.files("/data/clusterfs/lag/users/gokala/dyslexia-evol/ldsc/nonancreg_intercepts/", full.names = T, include.dirs = F, pattern = ".log") #otherwise it takes directores too
+files <- list.files("/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/replication/ancreg_intercepts/surface", full.names = T, include.dirs = F, pattern = ".log")
+files_wo <- list.files("/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/replication/nonancreg_intercepts/surface", full.names = T, include.dirs = F, pattern = ".log") #otherwise it takes directories too
 
 all_files <- c(files, files_wo)
 
@@ -22,21 +22,21 @@ for (i in 1:length(all_files)) {
   values <- as.numeric(unlist(str_extract_all(string = results, 
                                               pattern = "(?<=[:punct:]{1}\\s?)[:digit:]{1}\\.[:digit:]{2,4}")))
   info1 <- str_split(all_files[i], pattern = "/")
-  info2 <- str_split(info1[[1]][11], pattern = "_")
-  print(info2)
-  Surf_Thic <- case_when(info2[[1]][1] == "global" & grepl("hick",info2[[1]][3]) ~ "Thickness",
-                         info2[[1]][1] == "global" & grepl("urf",info2[[1]][3]) ~ "Surface Area",
-                         info2[[1]][2] == "global" & grepl("hick",info2[[1]][3]) ~ "Thickness",
-                         info2[[1]][2] == "global" & grepl("urf",info2[[1]][3]) ~ "Surface Area",
-                         grepl("hick",info2[[1]][1]) ~ "Thickness",
-                         grepl("hick",info2[[1]][3]) ~ "Thickness",
-                         grepl("surf",info2[[1]][1]) ~ "Surface Area",
-                         grepl("surf",info2[[1]][3]) ~ "Surface Area",
+  info2 <- str_split(info1[[1]][12], pattern = "\\.")
+  
+  Surf_Thic <- case_when(grepl("hick",info1[[1]][11]) ~ "Thickness",
+                         grepl("surf",info1[[1]][11]) ~ "Surface Area",
                          TRUE ~ "Not Applicable")
+  
+  #info2[[1]][1] == "global" & grepl("hick",info2[[1]][3]) ~ "Thickness",
+  #info2[[1]][1] == "global" & grepl("urf",info2[[1]][3]) ~ "Surface Area",
+  #info2[[1]][2] == "global" & grepl("hick",info2[[1]][3]) ~ "Thickness",
+  #info2[[1]][2] == "global" & grepl("urf",info2[[1]][3]) ~ "Surface Area",
+  
   Region <- str_split(info2[[1]][1], pattern = "\\.")[[1]][1]
   #info2[[1]][2]
   #paste(info2[[1]][2],str_split(info2[[1]][3], pattern = "\\.")[[1]][1],sep="_")
-  Anc_reg <- if_else(grepl("non",info1[[1]][9]), FALSE, TRUE)
+  Anc_reg <- if_else(grepl("non",info1[[1]][10]), FALSE, TRUE)
   to_add <- tibble("Region" = as.character(Region),
          "Surf_Thic" = as.character(Surf_Thic),
          "Anc_reg" = as.logical(Anc_reg),
@@ -54,7 +54,7 @@ for (i in 1:length(all_files)) {
 #intercepts$Region = factor(intercepts$Region, levels = regionordering$Region)
 #intercepts$Surf_Thic = factor(intercepts$Surf_Thic)
 #View(intercepts)
-write_csv(intercepts, "/data/clusterfs/lag/users/gokala/dyslexia-evol/ldsc/dyslexia_LDSC_intercepts_w_and_wo_ancreg.csv")
+write_csv(intercepts, "/data/clusterfs/lag/users/gokala/enigma-evol/ldsc/replication_LDSC_intercepts_w_and_wo_ancreg.csv")
 ## For making initial plots
 
 # 
