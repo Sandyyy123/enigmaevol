@@ -3,18 +3,21 @@
 ##The effects sizes from GWAS of 1000G PC components were acquired from Katya and are from phase 3
 ##They were calculated by deriving PCs from 1000G (all populations) and correlating that with SNPs
 ##The goal here is to see if population stratification is driving the results
+
+# Run this script for 4 sets of correlation values:
+# - SA with global covariates
+# - SA without global covariates
+# - TH with global covariates
+# - TH without global covariates
+#TODO automize this so that you don't need to hard-code paths and output files names everytime!
  
-##Install hexbin package for making hexagon scatterplots
-##install.packages("hexbin")
-##library(hexbin)
 options(stringsAsFactors=FALSE)
 library(GenomicRanges);
 
-dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_corvals/"
-#"P:/workspaces/lg-genlang/Working/Evolution/all_corvals/"
+dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/corvals/ancreg_replication/surface/"
+
 ##Output file
-foutput = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_corvals/corvalues_residual_BJK.pdf"
-#"P:/workspaces/lg-genlang/Working/Evolution/test_ancreg.pdf"
+foutput = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/ancestry_correlations/anc_regressed/anc_cor_residuals_SA_wGlobCov_onePerPage.pdf"
 
 fcorvals = dir(dircorvals,pattern="ancreg_BJK",full.names=TRUE);
 
@@ -31,7 +34,9 @@ for (i in 1:length(fcorvals)) {
     corind = grep("BJK_cor",colnames(corvals));
     pind = grep("BJK_P",colnames(corvals));
     seind = grep("BJK_SE",colnames(corvals));
-    x = barplot(as.matrix(corvals[1,corind]),main=corvals$X[1],ylab="correlation coefficient",xlab="Ancestry PC",names.arg=paste0("PC",seq(1,20)),ylim=c(-0.1,0.1));
+    region = strsplit(corvals$X[1], split = "_")[[1]][2]
+    
+    x = barplot(as.matrix(corvals[1,corind]),main=region,ylab="correlation coefficient",xlab="Ancestry PC",names.arg=paste0("PC",seq(1,20)),ylim=c(-0.05,0.05));
     y0 = as.numeric(corvals[1,corind]-corvals[1,seind]);
     y1 = as.numeric(corvals[1,corind]+corvals[1,seind]);
     arrows(x,y0,x,y1,angle=90,length=0)
@@ -52,9 +57,7 @@ dev.off()
 options(stringsAsFactors=FALSE)
 library(GenomicRanges);
 
-dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_corvals/";
-##Output file
-foutput = "/data/clusterfs/lag/users/gokala/enigma-evol/ancreg_corvals/corvalues_residual_BJK_allinone.pdf";
+foutput = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/ancestry_correlations/anc_regressed/anc_cor_residuals_SA_wGlobCov.pdf"
 
 fcorvals = dir(dircorvals,pattern="ancreg_BJK",full.names=TRUE);
 ind = grep("ancreg",fcorvals);
@@ -73,7 +76,9 @@ for (i in 1:length(fcorvals)) {
     corind = grep("BJK_cor",colnames(corvals));
     pind = grep("BJK_P",colnames(corvals));
     seind = grep("BJK_SE",colnames(corvals));
-    x = barplot(as.matrix(corvals[1,corind]),main=corvals$X[1],ylab="correlation coefficient",xlab="Ancestry PC",names.arg=paste0("PC",seq(1,20)),ylim=c(-0.1,0.1),cex.axis=0.7,cex.names=0.7);
+    region = strsplit(corvals$X[1], split = "_")[[1]][2]
+    
+    x = barplot(as.matrix(corvals[1,corind]),main=region,ylab="correlation coefficient",xlab="Ancestry PC",names.arg=paste0("PC",seq(1,20)),ylim=c(-0.05,0.05));
     y0 = as.numeric(corvals[1,corind]-corvals[1,seind]);
     y1 = as.numeric(corvals[1,corind]+corvals[1,seind]);
     arrows(x,y0,x,y1,angle=90,length=0)

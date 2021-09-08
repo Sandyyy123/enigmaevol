@@ -3,12 +3,16 @@
 ##The effects sizes from GWAS of 1000G PC components were acquired from Katya and are from phase 3
 ##They were calculated by deriving PCs from 1000G (all populations) and correlating that with SNPs
 ##The goal here is to see if population stratification is driving the results
- 
-##Install hexbin package for making hexagon scatterplots
-##install.packages("hexbin")
-##library(hexbin)
+
+
+# Run this script for 4 sets of correlation values:
+# - SA with global covariates
+# - SA without global covariates
+# - TH with global covariates
+# - TH without global covariates
+#TODO automize this so that you don't need to hard-code paths and output files names everytime!
+
 options(stringsAsFactors=FALSE)
-#library(GenomicRanges);
 
 dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/corvals/replication/surface/"
 #"P:/workspaces/lg-genlang/Working/Evolution/all_corvals/"

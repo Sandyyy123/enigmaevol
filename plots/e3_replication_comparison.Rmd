@@ -21,8 +21,8 @@ library(reshape2)
 # read correlation values
 e3=read.csv("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/original_corvalues_Mean_Full_SurfArea_BJK.csv")
 e3_ancreg=read.csv("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/ohbm/ancestryregressed_corvalues_Mean_Full_SurfArea_BJK.csv")
-rep_1=read.csv("/data/clusterfs/lag/users/gokala/enigma-evol/corvals/replication_v1/corvalues_SurfArea_global_total_BJK.csv")
-rep_1_ancreg=read.csv("/data/clusterfs/lag/users/gokala/enigma-evol/corvals/ancreg_replication_v1/corvalues_globalValues_averaged_SurfArea_ancreg_BJK.csv")
+rep_1=read.csv("/data/clusterfs/lag/users/gokala/enigma-evol/corvals/replication/surface/corvalues_surface_Full_replication_BJK.csv")
+rep_1_ancreg=read.csv("/data/clusterfs/lag/users/gokala/enigma-evol/corvals/ancreg_replication/corvalues_surface_Full_replication_ancreg.Rdata_ancreg_BJK.csv")
 
 # read ldsc intercepts
 e3_ldsc=read.csv("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/LDSC/MA6_LDSC_intercepts_before_after_Phase3_ancreg_Rdata_based_noGC.csv")
@@ -46,7 +46,7 @@ merged3=merge(e3_partherit,rep_1_partherit,by="Region")
 merged3=merged3[,c("Region","Prop._h2.x","Prop._h2_std_error.x","significant.x","Prop._h2.y","Prop._h2_std_error.y","significant.y")]
 ```
 
-## E3 replication comparison part. h2 barplots
+## E3 vs. replication comparison ancestry-PC correlation barplots
 
 ```{r pressure, echo=FALSE}
 
