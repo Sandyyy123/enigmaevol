@@ -36,33 +36,33 @@ clumpedControls = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_
 
 #check_for_plink_error #TODO
 
-#make_CSA_region_list = function(clumpedDir) {
-#  # gather rsID and TOTAL info lead SNPs from
-#  # each summary stats
-#  clumpedSNPs = data.frame()
-#  for (i in dir(clumpedDir, full.names = T, pattern = "clumped")) {
-#      region = sapply(i, function (x) {unlist(strsplit(as.character(x),"_",fixed=TRUE))[9]})
-#      tmp_clump = read.table(i, header = TRUE)
-#      tmp_df = data.frame(SNP = tmp_clump$SNP, TOTAL = tmp_clump$TOTAL)
-#      clumpedSNPs = rbind(clumpedSNPs, tmp_df)
-#  }
-#  write.table(clumpedSNPs,paste0(clumpedDir,"/snpsnap_list/surface_area_all.txt"),row.names = F, col.names = F, quote = F)
-#}
+make_CSA_region_list = function(clumpedDir) {
+  # gather rsID and TOTAL info lead SNPs from
+  # each summary stats
+  clumpedSNPs = data.frame()
+  for (i in dir(clumpedDir, full.names = T, pattern = "clumped")) {
+      region = sapply(i, function (x) {unlist(strsplit(as.character(x),"_",fixed=TRUE))[9]})
+      tmp_clump = read.table(i, header = TRUE)
+      tmp_df = data.frame(SNP = tmp_clump$SNP, TOTAL = tmp_clump$TOTAL)
+      clumpedSNPs = rbind(clumpedSNPs, tmp_df)
+  }
+  write.table(clumpedSNPs,paste0(clumpedDir,"/snpsnap_list/surface_area_all.txt"),row.names = F, col.names = F, quote = F)
+}
 
-#make_CSA_region_list_only_rsIDs = function(clumpedDir) {
+make_CSA_region_list_only_rsIDs = function(clumpedDir) {
   # gather rsID info lead SNPs from
   # each summary stats, use for SNPsnap
   # control variant generation
-#  clumpedSNPs = data.frame()
-#  clumpedFiles = intersect(dir(clumpedDir,full.names = T,pattern = "surface"),dir(clumpedDir,full.names = T,pattern = "clumped"))
-#  for (i in clumpedFiles) {
-#    region = sapply(i, function (x) {unlist(strsplit(as.character(x),"_",fixed=TRUE))[9]})
-#    tmp_clump = read.table(i,header=TRUE)
-#    tmp_df = data.frame(SNP=tmp_clump$SNP)
-#    clumpedSNPs=rbind(clumpedSNPs,tmp_df)
-#  }
-#  write.table(clumpedSNPs,paste0(outDir,"/surface_area_all.txt"),row.names = F, col.names = F, quote = F)
-#}
+  clumpedSNPs = data.frame()
+  clumpedFiles = intersect(dir(clumpedDir,full.names = T,pattern = "surface"),dir(clumpedDir,full.names = T,pattern = "clumped"))
+  for (i in clumpedFiles) {
+    region = sapply(i, function (x) {unlist(strsplit(as.character(x),"_",fixed=TRUE))[9]})
+    tmp_clump = read.table(i,header=TRUE)
+    tmp_df = data.frame(SNP=tmp_clump$SNP)
+    clumpedSNPs=rbind(clumpedSNPs,tmp_df)
+  }
+  write.table(clumpedSNPs,paste0(outDir,"/surface_area_all.txt"),row.names = F, col.names = F, quote = F)
+}
 
 get_num_LD_buddies = function(clumpedDir, outDir) { #TODO this prints 2 extra lines with ":", fix it!
   # get the rsIDs and LD buddy number from clumped file
@@ -74,17 +74,17 @@ get_num_LD_buddies = function(clumpedDir, outDir) { #TODO this prints 2 extra li
   }
 }
 
-#run_plink_ld = function(genotypeFile, controlVars, outDir) {
-#  # runs plink --ld in control snps
-#  
-#  controlVarsTable = read.table(controlVars, header = T)
-#  controlVarsTable = controlVarsTable[controlVarsTable$input_snp == args[1],]
-#  
-#  for (i in 1:nrow(controlVarsTable)) {
-#    system(paste0("module load plink/1.9b6 \
-#                   plink --bfile ",genotypeFile," --r2 dprime --ld-snp ",controlVarsTable$rsID[i]," --ld-window-kb 1000 --ld-window 99999 --ld-window-r2 0.9 --out ",outDir,"/",controlVarsTable$input_snp[i],"_",controlVarsTable$set[i],"_",controlVarsTable$rsID[i]))
-#    }
-#}
+run_plink_ld = function(genotypeFile, controlVars, outDir) {
+  # runs plink --ld in control snps
+  
+  controlVarsTable = read.table(controlVars, header = T)
+  controlVarsTable = controlVarsTable[controlVarsTable$input_snp == args[1],]
+  
+  for (i in 1:nrow(controlVarsTable)) {
+    system(paste0("module load plink/1.9b6 \
+                   plink --bfile ",genotypeFile," --r2 dprime --ld-snp ",controlVarsTable$rsID[i]," --ld-window-kb 1000 --ld-window 99999 --ld-window-r2 0.9 --out ",outDir,"/",controlVarsTable$input_snp[i],"_",controlVarsTable$set[i],"_",controlVarsTable$rsID[i]))
+    }
+}
 
 extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDbuddies, outDir) {
   # exracts lead SNP info from .clumped files

@@ -8,13 +8,12 @@
 ##install.packages("hexbin")
 ##library(hexbin)
 options(stringsAsFactors=FALSE)
-library(GenomicRanges);
+#library(GenomicRanges);
 
-dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/corvals/"
+dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/corvals/replication/surface/"
 #"P:/workspaces/lg-genlang/Working/Evolution/all_corvals/"
 ##Output file
-foutput = "/data/clusterfs/lag/users/gokala/enigma-evol/corvalues_BJK.pdf"
-#"P:/workspaces/lg-genlang/Working/Evolution/test_corvalsPlot.pdf"
+foutput = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/ancestry_correlations/raw/anc_cor_SA_wGlobCov_onePerPage.pdf"
 
 fcorvals = dir(dircorvals,full.names=TRUE,pattern="csv");
 
@@ -31,7 +30,9 @@ for (i in 1:length(fcorvals)) {
     corind = grep("BJK_cor",colnames(corvals));
     pind = grep("BJK_P",colnames(corvals));
     seind = grep("BJK_SE",colnames(corvals));
-    x = barplot(as.matrix(corvals[1,corind]),main=corvals$X[1],ylab="correlation coefficient",xlab="Ancestry PC",names.arg=paste0("PC",seq(1,20)),ylim=c(-0.1,0.1));
+    region = strsplit(corvals$X[1], split = "_")[[1]][2]
+    
+    x = barplot(as.matrix(corvals[1,corind]),main=region,ylab="correlation coefficient",xlab="Ancestry PC",names.arg=paste0("PC",seq(1,20)),ylim=c(-0.05,0.05));
     y0 = as.numeric(corvals[1,corind]-corvals[1,seind]);
     y1 = as.numeric(corvals[1,corind]+corvals[1,seind]);
     arrows(x,y0,x,y1,angle=90,length=0)
@@ -47,10 +48,8 @@ for (i in 1:length(fcorvals)) {
 }
 dev.off();
 
-
-dircorvals = "/data/clusterfs/lag/users/gokala/enigma-evol/corvals/";
 ##Output file
-foutput = "/data/clusterfs/lag/users/gokala/enigma-evol/corvalues_BJK_allinone.pdf";
+foutput = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/ancestry_correlations/raw/anc_cor_SA_wGlobCov.pdf"
 
 fcorvals = dir(dircorvals,full.names=TRUE,pattern="csv");
 ind = grep("corvalues",fcorvals);
@@ -69,7 +68,9 @@ for (i in 1:length(fcorvals)) {
     corind = grep("BJK_cor",colnames(corvals));
     pind = grep("BJK_P",colnames(corvals));
     seind = grep("BJK_SE",colnames(corvals));
-    x = barplot(as.matrix(corvals[1,corind]),main=corvals$X[1],ylab="correlation coefficient",xlab="Ancestry PC",names.arg=paste0("PC",seq(1,20)),ylim=c(-0.1,0.1),cex.axis=0.7,cex.names=0.7);
+    region = strsplit(corvals$X[1], split = "_")[[1]][2]
+    
+    x = barplot(as.matrix(corvals[1,corind]),main=region,ylab="correlation coefficient",xlab="Ancestry PC",names.arg=paste0("PC",seq(1,20)),ylim=c(-0.05,0.05));
     y0 = as.numeric(corvals[1,corind]-corvals[1,seind]);
     y1 = as.numeric(corvals[1,corind]+corvals[1,seind]);
     arrows(x,y0,x,y1,angle=90,length=0)
