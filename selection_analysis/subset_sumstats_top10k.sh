@@ -6,10 +6,10 @@
 # and creates matched control regions for CSA-associated regions.
 # All pipeline is based on LaBella et al. (2020).
 #---------------------------------------------------------------------- 
-sumstatsDir="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/data/ukb_eur_sumstats"
-sortedDir="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/data/ukb_eur_sumstats/pvalue_sorted_sumstats"
+sumstatsDir="/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr"
+sortedDir="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/data/european_lr/pvalue_sorted"
 genotypeFile="/data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/plink/1KG_phase3_GRCh37_EUR_nonFIN_allchr"
-outDir="/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats_p10e-5"
+outDir="/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5"
 
 ######################################################
 # Sort summary statistics based on pvalue (descending)
