@@ -18,23 +18,25 @@ library(gridExtra)
 
 ```{r read & clean data, echo=FALSE}
 # read the results table of HGE 7th PCW
-enrichment_scores = read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_hemi_spec_glob/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
-#read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_with_global/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
-enrichment_scores2 = read.table("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_hemi_spec_glob/HSE_7pcw_active_merged_results_FDR35.txt",header=T,sep="\t")
+left_enrich = read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/final_results/european_lr/results_tables/left/fetal_hge_hg19.merged.sorted_results_FDR34.txt",header=T,sep="\t")
+right_enrich = read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/final_results/european_lr/results_tables/right/fetal_hge_hg19.merged.sorted_results_FDR34.txt",header=T,sep="\t")
+
+left_enrich = left_enrich[left_enrich$Analysis=="Surface Area",]
+right_enrich = right_enrich[right_enrich$Analysis=="Surface Area",]
 
 # fix region names, get rid of blanks
-enrichment_scores$Region=gsub(" re _", "_re", enrichment_scores$Region)
-enrichment_scores$Region=gsub(" le _", "_le", enrichment_scores$Region)
+#enrichment_scores$Region=gsub(" re _", "_re", enrichment_scores$Region)
+#enrichment_scores$Region=gsub(" le _", "_le", enrichment_scores$Region)
 
 # remove globalNotScaled regions, because one is a duplicate and the other is for thickness
-enrichment_scores = filter(enrichment_scores, !grepl("globalNotScaled",Region))
-enrichment_scores$Region=gsub("globalScaled", "Full", enrichment_scores$Region)
+#enrichment_scores = filter(enrichment_scores, !grepl("globalNotScaled",Region))
+#enrichment_scores$Region=gsub("globalScaled", "Full", enrichment_scores$Region)
 
 # separate left and right hemispheres
-right_enrich = enrichment_scores %>%
-  filter(grepl("(?=.*_re)",enrichment_scores$Region,perl=TRUE))
-left_enrich = enrichment_scores %>%
-  filter(grepl("(?=.*_le)",enrichment_scores$Region,perl=TRUE))
+#right_enrich = enrichment_scores %>%
+#  filter(grepl("(?=.*_re)",enrichment_scores$Region,perl=TRUE))
+#left_enrich = enrichment_scores %>%
+#  filter(grepl("(?=.*_le)",enrichment_scores$Region,perl=TRUE))
 
 ```
 
@@ -57,6 +59,21 @@ p2 = ggscatter(for_scatter, x = "right_prop", y = "left_prop",  color = "#ED6B06
           xlab = "Right Hemisphere", ylab = "Left Hemisphere", title = "Proportion of heritability") + theme_bw()
 plot_grid(p1,p2,labels=c('A','B'),label_size = 12)
 #ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/enrichment/left-right_enrichment_scatter_hemiSpec_cov.pdf",height = 4,width = 7)
+
+# MS version
+ggscatter(for_scatter, x = "right_prop", y = "left_prop",  color = "#EEA300",
+          add = "reg.line", cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Right Hemisphere", ylab = "Left Hemisphere", title = "Proportion of heritability") +           theme_bw()
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/european_lr/eur_l-r_proph2_scatter.pdf",height = 8, width = 8)
+
+# without frontal pole
+for_scatter_woFP = for_scatter[-which(for_scatter$Region=="frontalpole"),]
+ggscatter(for_scatter_woFP, x = "right_prop", y = "left_prop",  color = "#EEA300",
+          add = "reg.line", cor.coef = TRUE, cor.method = "pearson",
+          xlab = "Right Hemisphere", ylab = "Left Hemisphere", title = "Proportion of heritability") +           theme_bw()
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/european_lr/eur_l-r_proph2_scatter_wo_frontalpole.pdf",height = 8,width = 8)
+
+
 ```
 
 ## Bar plot
@@ -145,19 +162,23 @@ bargraph_prop = ggplot(data = for_bar2,aes(x = Region,
 
 ##
 plot_grid(bargraph_enrichment,bargraph_prop,labels=c('A','B'),label_size = 12, ncol=1)
-#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/left_right_partherit_enrichment_and_proportion_v2.pdf", width = 9, height = 8, unit = "in")
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/european_lr/eur_lr_partherit_enrichment_and_proportion.pdf", width = 9, height = 8, unit = "in")
 ```
 
 # Back to back L-R h2 plot
 
 ```{r overlap analysis, echo=FALSE}
 
-g.mid = ggplot(for_bar2,aes(x=1,y=fct_rev(Region)))+geom_text(aes(label=Region),size=3.2)+
-  geom_segment(aes(x=0.94,xend=0.95,yend=Region))+
-  geom_segment(aes(x=1.05,xend=1.06,yend=Region))+
-  ggtitle("")+
-  ylab(NULL)+
-  scale_x_continuous(expand=c(0,0),limits=c(0.94,1.065))+
+for_bar2 = for_bar2[-which(for_bar2$Region=="frontalpole"),]
+for_bar2 = for_bar2[-which(for_bar2$Region=="rostralanteriorcingulate"),]
+
+g.mid = ggplot(for_bar2,aes(x=1,y=fct_rev(Region))) + 
+  geom_text(aes(label=Region),size=3.2) +
+  geom_segment(aes(x=0.94,xend=0.95,yend=Region)) +
+  geom_segment(aes(x=1.05,xend=1.06,yend=Region)) +
+  ggtitle("") +
+  ylab(NULL) +
+  scale_x_continuous(expand=c(0,0),limits=c(0.94,1.065)) +
   theme(axis.title=element_blank(),
         panel.grid=element_blank(),
         axis.text.y=element_blank(),
@@ -199,11 +220,12 @@ gg1 <- ggplot_gtable(ggplot_build(grid_plot1))
 gg2 <- ggplot_gtable(ggplot_build(grid_plot2))
 gg.mid <- ggplot_gtable(ggplot_build(g.mid))
 
-#pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/h2_prop/left-right_proph2_barplot_hemiSpec_cov.pdf",height = 5,width = 7)
+#pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/european_lr/left-right_proph2_barplot_wo_2regions.pdf",height = 5, width = 7)
 grid.arrange(gg1,gg.mid,gg2,ncol=3,widths=c(4.2/11,2.6/11,4.2/11))
 #dev.off()
 
 for_bar2[for_bar2$Hemisphere=="left_prop",]
-#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/h2_prop/left-right_proph2_barplot_hemiSpec_cov.pdf",height = 4,width = 7)
+
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/european_lr/left-right_proph2_barplot2.pdf", height = 4, width = 7)
 ```
 sessionInfo()

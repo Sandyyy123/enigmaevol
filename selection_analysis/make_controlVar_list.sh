@@ -12,7 +12,7 @@
 #-----------------------
 # PATHS
 
-matched_snps_annotatedDir="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/snpsnap_lists/european_hemave/SNPsnap_european_hemave"
+matched_snps_annotatedDir="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/SNPsnap_eur_right"
 
 #-----------------------
 # MAIN

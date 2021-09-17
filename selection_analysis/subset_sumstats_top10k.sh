@@ -53,7 +53,7 @@ for i in ${sortedDir}/*_top10k.txt; do
 #$ -S /bin/bash
 cd '${outDir}'
 module load plink/1.9b6
-plink --bfile '${genotypeFile}' --clump '${i}' --clump-r2 0.9 --clump-p1 10e-5 --out '${outDir}/${base_name%.txt}'" >> ${outDir}/scripts/${base_name%.txt}.sh
+plink --bfile '${genotypeFile}' --clump '${i}' --clump-kb 500 --clump-r2 0.9 --clump-p1 10e-5 --clump-p2 10e-5 --out '${outDir}/${base_name%.txt}'" >> ${outDir}/scripts/${base_name%.txt}.sh
 	chmod a+x ${outDir}/scripts/${base_name%.txt}.sh
 	qsub -o ${outDir}/shell_logs/${base_name%.txt}.out -j y "${outDir}/scripts/${base_name%.txt}.sh"
 done

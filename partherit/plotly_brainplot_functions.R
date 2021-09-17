@@ -164,8 +164,12 @@ brainplot_SA <- function(dta,
 }
 
 ### Thickness ###
+regionordering <- read.csv("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/freesurfer_orderandcolor.csv")
+load("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/FreesurferRegionalObjs.Rdata")
+str(objs)
 
 brainplot_TH <- function(dta, out_prefix, out_suffix, loop_over, region_col, Z_col, analysis_col, max_val, low_color, high_color) {
+  
   fZ <- dta
   fZ$SNP <- fZ[, loop_over]
   fZ$Trait <- fZ[, region_col]
@@ -173,7 +177,7 @@ brainplot_TH <- function(dta, out_prefix, out_suffix, loop_over, region_col, Z_c
   Z.SA <- fZ[grepl("Surf", fZ[[analysis_col]]), ]
   Z.TH <- fZ[grepl("Thick", fZ[[analysis_col]]), ]
 
-  objs <- objs[1:35]
+  objs <- objs[36:70]
   names(objs) <- sapply(names(objs), function(x) {
     unlist(strsplit(x, ".", fixed = TRUE))[length(unlist(strsplit(x, ".", fixed = TRUE)))]
   })
@@ -256,15 +260,19 @@ brainplot_TH <- function(dta, out_prefix, out_suffix, loop_over, region_col, Z_c
       }
     }
     p <- layout(p = p, scene = list(xaxis = ax, yaxis = ax, zaxis = ax, camera = list(eye = list(x = 2, y = 0, z = 0))), title = ftitle)
-    export(p, file = paste0(out_prefix, uniquesnps.SA[j], "_medial_TH_", out_suffix, ".png"))
-    #htmlwidgets::saveWidget(p, file = paste0(out_prefix, uniquesnps.TH[j], "_medial_TH_", out_suffix, ".html"), selfcontained = FALSE)
+    #export(p, file = paste0(out_prefix, uniquesnps.SA[j], "_medial_TH_", out_suffix, ".png"))
+    htmlwidgets::saveWidget(p, file = paste0(out_prefix, uniquesnps.TH[j], "_medial_TH_", out_suffix, ".html"), selfcontained = FALSE)
     p <- layout(p = p, scene = list(xaxis = ax, yaxis = ax, zaxis = ax, camera = list(eye = list(x = -2, y = 0, z = 0))), title = ftitle)
-    export(p, file = paste0(out_prefix, uniquesnps.SA[j], "_medial_TH_", out_suffix, ".png"))
-    #htmlwidgets::saveWidget(p, file = paste0(out_prefix, uniquesnps.TH[j], "_lateral_TH_", out_suffix, ".html"), selfcontained = FALSE)
+    #export(p, file = paste0(out_prefix, uniquesnps.SA[j], "_medial_TH_", out_suffix, ".png"))
+    htmlwidgets::saveWidget(p, file = paste0(out_prefix, uniquesnps.TH[j], "_lateral_TH_", out_suffix, ".html"), selfcontained = FALSE)
   }
 }
 
 ### Full Surface Area or Thickness ###
+regionordering <- read.csv("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/freesurfer_orderandcolor.csv")
+load("/data/workspaces/lag/workspaces/lg-neanderthals/raw_data/ENIGMA-EVO/MA6/Cerebral_Cortex_revisions/plotting/FreesurferRegionalObjs.Rdata")
+str(objs)
+
 brainplot_full <- function(dta, out_prefix, out_suffix, loop_over, region_col, Z_col, analysis_col, max_val, low_color, high_color, nonsig_color) {
   fZ <- dta
   fZ$SNP <- fZ[, loop_over]
@@ -373,8 +381,8 @@ brainplot_full <- function(dta, out_prefix, out_suffix, loop_over, region_col, Z
     p <- layout(p = p, scene = list(xaxis = ax, yaxis = ax, zaxis = ax, camera = list(eye = list(x = -2, y = 0, z = 0))), title = ftitle)
     p_file <- paste0(out_prefix, uniquesnps.TH[j], "_lateral_fullTH_", out_suffix, ".html")
     message(p_file)
-    export(p, file = paste0(p_file, out_suffix, ".png"))
-    #htmlwidgets::saveWidget(p, file = p_file, selfcontained = FALSE)
+    #export(p, file = paste0(p_file, out_suffix, ".png"))
+    htmlwidgets::saveWidget(p, file = p_file, selfcontained = FALSE)
   }
 
   for (j in 1:length(uniquesnps.SA)) {

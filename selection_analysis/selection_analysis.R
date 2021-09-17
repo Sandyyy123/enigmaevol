@@ -23,9 +23,10 @@ options(stringsAsFactors=FALSE)
 # PATHS
 
 clumpedDir="/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5/left"
+#"/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5/left"
 genotypeFile = "/data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/plink/1KG_phase3_GRCh37_EUR_nonFIN_allchr"
-controlVars = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/SNPsnap_european_lr/matched_snps_annotated_subset.filtered.txt"
-outDir= "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr"
+controlVars = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/SNPsnap_eur_left/matched_snps_annotated_subset.filtered.txt"
+outDir= "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/left"
 leadSNPlist = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave/working_snps.txt"
 clumpedControls = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave"
 
@@ -46,7 +47,7 @@ make_CSA_region_list = function(clumpedDir) {
       tmp_df = data.frame(SNP = tmp_clump$SNP, TOTAL = tmp_clump$TOTAL)
       clumpedSNPs = rbind(clumpedSNPs, tmp_df)
   }
-  write.table(clumpedSNPs,paste0(clumpedDir,"/snpsnap_list/surface_area_right.txt"),row.names = F, col.names = F, quote = F)
+  write.table(clumpedSNPs,paste0(clumpedDir,"/snpsnap_list/surface_area_all.txt"),row.names = F, col.names = F, quote = F)
 }
 
 make_CSA_region_list_only_rsIDs = function(clumpedDir) {
@@ -61,7 +62,7 @@ make_CSA_region_list_only_rsIDs = function(clumpedDir) {
     tmp_df = data.frame(SNP=tmp_clump$SNP)
     clumpedSNPs=rbind(clumpedSNPs,tmp_df)
   }
-  write.table(clumpedSNPs,paste0(outDir,"/snpsnap_list/surface_area_left_rsIDs.txt"),row.names = F, col.names = F, quote = F)
+  write.table(clumpedSNPs,paste0(outDir,"/snpsnap_list/surface_area_right_rsIDs.txt"),row.names = F, col.names = F, quote = F)
 }
 
 #get_num_LD_buddies = function(clumpedDir, outDir) { #TODO this prints 2 extra lines with ":", fix it!
@@ -73,6 +74,8 @@ make_CSA_region_list_only_rsIDs = function(clumpedDir) {
 #    system(paste0("awk '{print $1\":\"$4\"\t\"$3\"\t\"$6}' ", i, " > ", paste0(outDir,"/",file_name_base,"_LDbuddy_counts.txt"))) #TODO use column names instead of field numbers
 #  }
 #}
+
+# Go run SNPsnap with the rsID lists!
 
 run_plink_ld = function(genotypeFile, controlVars, outDir) {
   # runs plink --ld in control snps

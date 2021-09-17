@@ -1,6 +1,6 @@
 ## ----------------------------------------------------
 # Partitioned Heritability brainplots for ENIGMA-EVO manuscript
-# for HGE 7pcw only, using ancestry regressed, noGC data
+# for HGE 7pcw only, using non-ancestry regressed, noGC data
 ## ----------------------------------------------------
 
 options(stringsAsFactors = FALSE)
@@ -15,8 +15,8 @@ library(plotly)
 source("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/scripts/enigmaevol/partherit/plotly_brainplot_functions.R")
 
 # Reading the partitioned heritability summary statistics
-HSE_7pcw <- read.delim("/data/clusterfs/lag/users/gokala/enigma-evol/partherit/results_tables/regional_hemi_spec_glob/HSE_7pcw_active_merged_results_FDR35.txt", header = TRUE)
-HSE_7pcw[HSE_7pcw$Region=="global",]$Region="Full"
+HSE_7pcw <- read.delim("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/final_results/european_lr/results_tables/left/neanDepRegions_hg19.sorted_results_FDR34.txt", header = TRUE)
+#HSE_7pcw[HSE_7pcw$Region=="global",]$Region="Full"
 
 HSE_7pcw$Region <- factor(HSE_7pcw$Region,levels=regionordering$Region)
 
@@ -34,8 +34,8 @@ HSE_7pcw_SA$Enrichment_plot <- if_else(HSE_7pcw_SA$fdr >= 0.05, true = 0, false 
 HSE_7pcw_TH$Enrichment_plot <- if_else(HSE_7pcw_TH$fdr >= 0.05, true = 0, false = HSE_7pcw_TH$Enrichment)
 
 brainplot_full(dta = HSE_7pcw_SA,
-               out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/plots/partherit_brainplots/replication_whiteBrit_ancreg/mpi_colors/",
-               out_suffix = "nonancreg_whiteBrit",
+               out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/european_lr/",
+               out_suffix = "eur_lr_left",
                loop_over = "Annotation",
                region_col = "Region",
                Z_col = "Enrichment_plot",
@@ -46,8 +46,8 @@ brainplot_full(dta = HSE_7pcw_SA,
                nonsig_color = "#BABABC")
 
 brainplot_SA(dta = HSE_7pcw_SA,
-             out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/plots/partherit_brainplots/replication_whiteBrit_ancreg/mpi_colors/",
-             out_suffix = "ancreg_whiteBrit",
+             out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/european_lr/",
+             out_suffix = "eur_lr_right",
              loop_over = "Annotation",
              region_col = "Region",
              Z_col = "Enrichment_plot",
@@ -59,8 +59,8 @@ brainplot_SA(dta = HSE_7pcw_SA,
 
 
 brainplot_TH(dta = HSE_7pcw_TH,
-             out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/plots/partherit_brainplots/replication_whiteBrit/",
-             out_suffix = "nonancreg_EUR",
+             out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/replication/",
+             out_suffix = "eur_lr_right",
              loop_over = "Annotation",
              region_col = "Region",
              Z_col = "Enrichment",
