@@ -1,10 +1,3 @@
-#' ---
-#' title: "overlap_analysis_eQTL"
-#' author: "Gokberk Alagoz"
-#' date: "September 26, 2021"
-#' output: html_document
-#' ---
-#' 
 ## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 args = commandArgs(trailingOnly=TRUE)
@@ -12,9 +5,7 @@ options(stringsAsFactors=FALSE)
 library(GenomicRanges)
 library(biomaRt)
 
-#' 
-#' ## R Markdown
-#' 
+
 ## ----paths, echo=FALSE--------------------------------------------------------
 bedfile = args[1] # "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/new_annotations/beds/GRCh37/neanDepRegions_hg19.sorted.bed"
 sumstatsList = args[2] # "/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/sumstats_txt_list.txt"
@@ -22,9 +13,7 @@ clumpedSumstatsDir = args[3] #"/data/clusterfs/lag/users/gokala/enigma-evol/eqtl
 outDir = args[4] # "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results"
 genotypeF = "/data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/plink/1KG_phase3_GRCh37_EUR_nonFIN_allchr"
 
-#' 
-#' ## Including Plots
-#' 
+
 ## ----parse, echo=FALSE--------------------------------------------------------
 
 # eQTL data downloaded from PsychENCODE
@@ -40,7 +29,7 @@ phenoname = paste0(sapply(clumpfileloc, function (x) {unlist(strsplit(x, "_", fi
 annot_name = unlist(strsplit(unlist(strsplit(bedfile, "/", fixed=T))[15], ".", fixed=T))[1]
 
 
-#' 
+
 ## ----fullSA_left--------------------------------------------------------------
 
 # Full surface area (LEFT HEM.)
@@ -127,7 +116,7 @@ write.csv(d, file = paste0(outDir, "/leftHem_SA_", annot_name, "_lr_olap_snps.cs
           row.names = FALSE, quote = FALSE)
 
 
-#' 
+
 ## ----fullSA_right-------------------------------------------------------------
 
 # Full surface area (RIGHT HEM.)
@@ -213,7 +202,7 @@ write.csv(d, file = paste0(outDir, "/rightHem_SA_", annot_name, "_lr_olap_snps.c
           row.names = FALSE, quote = FALSE)
 
 
-#' 
+
 ## ----regionalSA_left----------------------------------------------------------
 
 # All regional surface areas (LEFT HEM.)
@@ -307,7 +296,7 @@ write.csv(d, file = paste0(outDir, "/regionalSA_le_", annot_name, "_lr_olap_snps
           row.names = FALSE, quote = FALSE)
 
 
-#' 
+
 ## ----regionalSA_right---------------------------------------------------------
 
 # All regional surface areas (RIGHT HEM.)
@@ -402,7 +391,7 @@ write.csv(d, file = paste0(outDir, "/regionalSA_ri_", annot_name, "_lr_olap_snps
 
 
 
-#' 
+
 ## -----------------------------------------------------------------------------
 sessionInfo()
 

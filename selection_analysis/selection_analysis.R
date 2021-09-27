@@ -22,11 +22,11 @@ options(stringsAsFactors=FALSE)
 #--------------------------------------------
 # PATHS
 
-clumpedDir="/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5/left"
+clumpedDir="/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5/right"
 #"/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5/left"
 genotypeFile = "/data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/plink/1KG_phase3_GRCh37_EUR_nonFIN_allchr"
-controlVars = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/SNPsnap_eur_left/matched_snps_annotated_subset.filtered.txt"
-outDir= "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/left"
+controlVars = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/SNPsnap_eur_right/matched_snps_annotated_subset.filtered.txt"
+outDir= "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/right"
 leadSNPlist = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave/working_snps.txt"
 clumpedControls = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave"
 
