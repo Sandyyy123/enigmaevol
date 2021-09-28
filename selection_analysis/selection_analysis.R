@@ -82,10 +82,13 @@ run_plink_ld = function(genotypeFile, controlVars, outDir) {
   
   controlVarsTable = read.table(controlVars, header = T)
   controlVarsTable = controlVarsTable[controlVarsTable$input_snp == args[1],]
-  
+  i=1
   for (i in 1:nrow(controlVarsTable)) {
     system(paste0("module load plink/1.9b6 \
-                   plink --bfile ",genotypeFile," --r2 dprime --ld-snp ",controlVarsTable$rsID[i]," --ld-window-kb 1000 --ld-window 99999 --ld-window-r2 0.9 --out ",outDir,"/",controlVarsTable$input_snp[i],"_",controlVarsTable$set[i],"_",controlVarsTable$rsID[i]))
+                   plink --bfile ", genotypeFile, " --r2 dprime --ld-snp ", 
+                  controlVarsTable$rsID[i], " --ld-window-kb 1000 --ld-window 99999 --ld-window-r2 0.9 --out ",
+                  outDir, "/", controlVarsTable$input_snp[i], "_", controlVarsTable$set[i], "_", 
+                  controlVarsTable$rsID[i]))
     }
 }
 

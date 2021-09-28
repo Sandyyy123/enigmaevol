@@ -90,14 +90,14 @@ regionalAnnot = LDSNPs[which(!is.na(match(LDSNPs$indexSNP, regionalSA_vars)))]
 cat('Number of loci that overlap with ', annot_name, ' is: ', length(unique(regionalAnnot$indexSNP)), '\n')
 
 olap2 = findOverlaps(eqtl.GR, regionalAnnot)
-regionalSA_eqtl_vars  =unique(regionalAnnot$indexSNP[subjectHits(olap2)])
-cat('Number of ', annot_name, ' overlapping loci that also have an eQTL: ', length(unique(globalAnnot$indexSNP[subjectHits(olap2)])), '\n')
+regionalSA_eqtl_vars  = unique(regionalAnnot$indexSNP[subjectHits(olap2)])
+cat('Number of ', annot_name, ' overlapping loci that also have an eQTL: ', length(unique(regionalSA_eqtl_vars$indexSNP[subjectHits(olap2)])), '\n')
 eqtlgenes = unique(eqtl.GR$gene_id[queryHits(olap2)])
         
 # Remove the . annotation
 eqtlgenes = sapply(eqtlgenes, function (x) {unlist(strsplit(x, ".", fixed=TRUE))[1]})
 
-if (length(unique(globalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
+if (length(unique(regionalSA_eqtl_vars$indexSNP[subjectHits(olap2)])) > 0) {
   
   # Convert these genes to hgnc_id
   mart = useMart(biomart="ENSEMBL_MART_ENSEMBL",
@@ -177,14 +177,14 @@ regionalAnnot = LDSNPs[which(!is.na(match(LDSNPs$indexSNP, regionalSA_vars)))]
 cat('Number of loci that overlap with ', annot_name, ' is: ', length(unique(regionalAnnot$indexSNP)), '\n')
 
 olap2 = findOverlaps(eqtl.GR, regionalAnnot)
-regionalSA_eqtl_vars  =unique(regionalAnnot$indexSNP[subjectHits(olap2)])
-cat('Number of ', annot_name, ' overlapping loci that also have an eQTL: ', length(unique(globalAnnot$indexSNP[subjectHits(olap2)])), '\n')
+regionalSA_eqtl_vars = unique(regionalAnnot$indexSNP[subjectHits(olap2)])
+cat('Number of ', annot_name, ' overlapping loci that also have an eQTL: ', length(unique(regionalSA_eqtl_vars$indexSNP[subjectHits(olap2)])), '\n')
 eqtlgenes = unique(eqtl.GR$gene_id[queryHits(olap2)])
 
 # Remove the . annotation
 eqtlgenes = sapply(eqtlgenes, function (x) {unlist(strsplit(x, ".", fixed = TRUE))[1]})
 
-if (length(unique(globalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
+if (length(unique(regionalSA_eqtl_vars$indexSNP[subjectHits(olap2)])) > 0) {
   
   # Convert these genes to hgnc_id
   mart = useMart(biomart = "ENSEMBL_MART_ENSEMBL",

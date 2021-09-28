@@ -35,7 +35,7 @@ for i in $bedfilesDir/*.bed; do
 
 	echo '#$ -N eqtl_overlap
 #$ -cwd
-#$ -q multi15.q
+#$ -q single15.q
 #$ -S /bin/bash
 
 module load R/R-4.0.3

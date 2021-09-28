@@ -1,0 +1,155 @@
+---
+title: "fetch_multi_align"
+author: "Gokberk Alagoz"
+date: "September 28, 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(stringr)
+library(httr)
+library(jsonlite)
+library(xml2)
+library(rjson)
+```
+
+## R Markdown
+
+```{r}
+lead_snps = read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/globularity/evolution/results/leadSNPs.txt", header = T)
+
+# remove multi-allelic SNPs
+lead_snps_1 = lead_snps[str_detect(lead_snps$rsID, "rs"), ]
+
+outDir = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/globularity/evolution/results/phylogenetic_context/multiple_seq_alignments/"
+
+```
+
+
+```{r fetch_seqs_100bp}
+
+for (i in 1:length(lead_snps_1$rsID)) {
+  #i=1
+  tmp_rsID = lead_snps_1$rsID[i]
+  tmp_chr = lead_snps_1$chr[i]
+  # extract the region covering +-100bp of the variant
+  tmp_seq_str = lead_snps_1$pos[i]-100
+  tmp_seq_end = lead_snps_1$pos[i]+100
+  
+  server <- "http://rest.ensembl.org"
+  ext <- paste0("/alignment/region/homo_sapiens/", tmp_chr, ":", tmp_seq_str, "-", 
+                tmp_seq_end, "?species_set_group=primates")
+
+  r <- GET(paste(server, ext, sep = ""), content_type("application/json"))
+  #r <- GET(paste(server, ext, sep = ""), content_type(".xml"))
+  #stop_for_status(r)
+ 
+  # use this if you get a simple nested list back, otherwise inspect its structure
+  # head(data.frame(t(sapply(content(r),c))))
+  #head(fromJSON(toJSON(content(r))))
+  json_object = fromJSON(toJSON(content(r)))[[1]]
+  
+  if (json_object == "no alignment available for this region") {next}
+  else {
+  species_tree = json_object$tree
+  
+  m = matrix(NA, nrow = length(jason_object$alignments), ncol = 6)
+  tmp_df = as.data.frame(m)
+  colnames(tmp_df) = c("species", 
+                       "chr", 
+                       "seq_str", 
+                       "seq_end",  
+                       "strand", 
+                       "seq")
+  
+  #tmp_df = data.frame(species = character(), 
+  #                    chr = character(), 
+  #                    seq_str = character(), 
+  #                    seq_end = character(), 
+  #                    strand = character(), 
+  #                    seq = character())
+
+  # loop over extant species and ancestors
+  for (j in 1:length(json_object$alignments)) {
+    #j=1
+    
+    tmp_df$species[j] = json_object$alignments[[j]]$species
+    tmp_df$chr[j] = tmp_chr
+    tmp_df$seq_str[j] = json_object$alignments[[j]]$start
+    tmp_df$seq_end[j] = json_object$alignments[[j]]$end
+    tmp_df$strand[j] = json_object$alignments[[j]]$strand
+    tmp_df$seq[j] = json_object$alignments[[j]]$seq
+    
+  }
+
+  write.table(tmp_df, file = paste0(outDir, tmp_rsID, ".tab"),
+                row.names = FALSE, quote = FALSE, sep = "\t")
+
+  write.table(species_tree, file = paste0(outDir, tmp_rsID, "_tree.txt"),
+                row.names = FALSE, quote = FALSE)
+  
+  }
+}
+
+```
+
+## Including Plots
+
+```{r fetch_seqs_10bp}
+for (i in 1:length(lead_snps_1$rsID)) {
+  #i=1
+  tmp_rsID = lead_snps_1$rsID[i]
+  tmp_chr = lead_snps_1$chr[i]
+  # extract the region covering +-100bp of the variant
+  tmp_seq_str = lead_snps_1$pos[i]-10
+  tmp_seq_end = lead_snps_1$pos[i]+10
+  
+  server <- "http://rest.ensembl.org"
+  ext <- paste0("/alignment/region/homo_sapiens/", tmp_chr, ":", tmp_seq_str, "-", 
+                tmp_seq_end, "?species_set_group=primates")
+
+  r <- GET(paste(server, ext, sep = ""), content_type("application/json"))
+  #r <- GET(paste(server, ext, sep = ""), content_type(".xml"))
+  #stop_for_status(r)
+ 
+  # use this if you get a simple nested list back, otherwise inspect its structure
+  # head(data.frame(t(sapply(content(r),c))))
+  #head(fromJSON(toJSON(content(r))))
+  json_object = fromJSON(toJSON(content(r)))[[1]]
+  
+  if (json_object == "no alignment available for this region") {next}
+  else {
+  species_tree = json_object$tree
+  
+  m = matrix(NA, nrow = length(jason_object$alignments), ncol = 2)
+  tmp_df = as.data.frame(m)
+  colnames(tmp_df) = c("species", 
+                       "seq")
+  
+  #tmp_df = data.frame(species = character(), 
+  #                    chr = character(), 
+  #                    seq_str = character(), 
+  #                    seq_end = character(), 
+  #                    strand = character(), 
+  #                    seq = character())
+
+  # loop over extant species and ancestors
+  for (j in 1:length(json_object$alignments)) {
+    #j=1
+    
+    tmp_df$species[j] = json_object$alignments[[j]]$species
+    tmp_df$seq[j] = json_object$alignments[[j]]$seq
+    
+  }
+
+  write.table(tmp_df, file = paste0(outDir, tmp_rsID, "_10bp.tab"),
+                row.names = FALSE, quote = FALSE, sep = "\t")
+
+  write.table(species_tree, file = paste0(outDir, tmp_rsID, "_10bp_tree.txt"),
+                row.names = FALSE, quote = FALSE)
+  
+  }
+}
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
