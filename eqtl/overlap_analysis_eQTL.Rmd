@@ -115,16 +115,21 @@ if (length(unique(regionalSA_eqtl_vars$indexSNP[subjectHits(olap2)])) > 0) {
   print("There are not any CSA-associated variant - eQTL overlap")
 }
 
-m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
-d = as.data.frame(m)
-colnames(d) = c("olap_snps", "eqtl_snps", "region")
+if (length(regionalSA_vars) > 0) {
 
-d$olap_snps = regionalSA_vars
-d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
-d$region = clump[match(regionalSA_vars, clump$SNP),]$region
-d$olap_snps[match(regionalSA_eqtl_vars, d$olap_snps)]
-write.csv(d, file = paste0(outDir, "/leftHem_SA_", annot_name, "_lr_olap_snps.csv"),
-          row.names = FALSE, quote = FALSE)
+  m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
+  d = as.data.frame(m)
+  colnames(d) = c("olap_snps", "eqtl_snps", "region")
+  
+  d$olap_snps = regionalSA_vars
+  d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
+  d$region = "full_leftHem"
+  d$olap_snps[match(regionalSA_eqtl_vars, d$olap_snps)]
+  write.csv(d, file = paste0(outDir, "/leftHem_SA_", annot_name, "_lr_olap_snps.csv"),
+            row.names = FALSE, quote = FALSE)
+} else {
+  print("There are not any CSA-associated variants - annotation overlap")
+}
 
 ```
 
@@ -201,16 +206,21 @@ if (length(unique(regionalSA_eqtl_vars$indexSNP[subjectHits(olap2)])) > 0) {
   print("There are not any CSA-associated variant - eQTL overlap")
 }
 
-m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
-d = as.data.frame(m)
-colnames(d) = c("olap_snps", "eqtl_snps", "region")
+if (length(regionalSA_vars) > 0) {
 
-d$olap_snps = regionalSA_vars
-d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
-d$region = clump[match(regionalSA_vars, clump$SNP),]$region
-d$olap_snps[match(regionalSA_eqtl_vars, d$olap_snps)]
-write.csv(d, file = paste0(outDir, "/rightHem_SA_", annot_name, "_lr_olap_snps.csv"),
-          row.names = FALSE, quote = FALSE)
+  m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
+  d = as.data.frame(m)
+  colnames(d) = c("olap_snps", "eqtl_snps", "region")
+  
+  d$olap_snps = regionalSA_vars
+  d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
+  d$region = "full_rightHem"
+  d$olap_snps[match(regionalSA_eqtl_vars, d$olap_snps)]
+  write.csv(d, file = paste0(outDir, "/rightHem_SA_", annot_name, "_lr_olap_snps.csv"),
+            row.names = FALSE, quote = FALSE)
+} else {
+  print("There are not any CSA-associated variants - annotation overlap")
+}
 
 ```
 
@@ -295,16 +305,21 @@ if (length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
   print("There are not any CSA-associated variant - eQTL overlap")
 }
 
-m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
-d = as.data.frame(m)
-colnames(d) = c("olap_snps", "eqtl_snps", "region")
+if (length(regionalSA_vars) > 0) {
 
-d$olap_snps = regionalSA_vars
-d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
-d$region = clump[match(regionalSA_vars, clump$SNP),]$region
-d$olap_snps[match(regionalSA_eqtl_vars, d$olap_snps)]
-write.csv(d, file = paste0(outDir, "/regionalSA_le_", annot_name, "_lr_olap_snps.csv"),
-          row.names = FALSE, quote = FALSE)
+  m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
+  d = as.data.frame(m)
+  colnames(d) = c("olap_snps", "eqtl_snps", "region")
+  
+  d$olap_snps = regionalSA_vars
+  d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
+  d$region = clump[match(regionalSA_vars, clump$SNP),]$region
+  
+  write.csv(d, file = paste0(outDir, "/regionalSA_le_", annot_name, "_lr_olap_snps.csv"),
+            row.names = FALSE, quote = FALSE)
+} else {
+  print("There are not any CSA-associated variants - annotation overlap")
+}
 
 ```
 
@@ -389,21 +404,25 @@ if (length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
   print("There are not any CSA-associated variant - eQTL overlap")
 }
 
-m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
-d = as.data.frame(m)
-colnames(d) = c("olap_snps", "eqtl_snps", "region")
+if (length(regionalSA_vars) > 0) {
 
-d$olap_snps = regionalSA_vars
-d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
-d$region = clump[match(regionalSA_vars, clump$SNP),]$region
-d$olap_snps[match(regionalSA_eqtl_vars, d$olap_snps)]
-write.csv(d, file = paste0(outDir, "/regionalSA_ri_", annot_name, "_lr_olap_snps.csv"),
-          row.names = FALSE, quote = FALSE)
-
+  m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
+  d = as.data.frame(m)
+  colnames(d) = c("olap_snps", "eqtl_snps", "region")
+  
+  d$olap_snps = regionalSA_vars
+  d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
+  d$region = clump[match(regionalSA_vars, clump$SNP),]$region
+  
+  write.csv(d, file = paste0(outDir, "/regionalSA_ri_", annot_name, "_lr_olap_snps.csv"),
+            row.names = FALSE, quote = FALSE)
+} else {
+  print("There are not any CSA-associated variants - annotation overlap")
+}
 
 ```
 
 ```{r}
 sessionInfo()
-#knitr::purl("eqtl/overlap_analysis_eQTL.Rmd", "eqtl/overlap_analysis_eQTL.R", documentation = 2) # save .Rmd as an .R file to submit to Grid
+#knitr::purl("overlap_analysis_eQTL.Rmd", "overlap_analysis_eQTL.R", documentation = 2) # save .Rmd as an .R file to submit to Grid
 ```

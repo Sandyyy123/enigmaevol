@@ -5,7 +5,7 @@
 #' output: html_document
 #' ---
 #' 
-## ----setup, include=FALSE----------------------------------------------------------------------------
+## ----setup, include=FALSE------------------------------------------------------------------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 args = commandArgs(trailingOnly=TRUE)
 options(stringsAsFactors=FALSE)
@@ -15,7 +15,7 @@ library(biomaRt)
 #' 
 #' ## R Markdown
 #' 
-## ----paths, echo=FALSE-------------------------------------------------------------------------------
+## ----paths, echo=FALSE---------------------------------------------------------------------------------------------------------------------------
 bedfile = args[1] # "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/new_annotations/beds/GRCh37/neanDepRegions_hg19.sorted.bed"
 sumstatsList = args[2] # "/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/sumstats_txt_list.txt"
 clumpedSumstatsDir = args[3] #"/data/clusterfs/lag/users/gokala/enigma-evol/eqtl/clumped_sumstats/european_lr"
@@ -25,7 +25,7 @@ genotypeF = "/data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/pl
 #' 
 #' ## Including Plots
 #' 
-## ----parse, echo=FALSE-------------------------------------------------------------------------------
+## ----parse, echo=FALSE---------------------------------------------------------------------------------------------------------------------------
 
 # eQTL data downloaded from PsychENCODE
 feqtl = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/old_results/eqtl/DER-08a_hg19_eQTL.significant.txt"
@@ -41,7 +41,7 @@ annot_name = unlist(strsplit(unlist(strsplit(bedfile, "/", fixed=T))[15], ".", f
 
 
 #' 
-## ----fullSA_left-------------------------------------------------------------------------------------
+## ----fullSA_left---------------------------------------------------------------------------------------------------------------------------------
 
 # Full surface area (LEFT HEM.)
 # Start by getting all the clumped SNPs only for full surface area
@@ -90,14 +90,14 @@ regionalAnnot = LDSNPs[which(!is.na(match(LDSNPs$indexSNP, regionalSA_vars)))]
 cat('Number of loci that overlap with ', annot_name, ' is: ', length(unique(regionalAnnot$indexSNP)), '\n')
 
 olap2 = findOverlaps(eqtl.GR, regionalAnnot)
-regionalSA_eqtl_vars = unique(regionalAnnot$indexSNP[subjectHits(olap2)])
-cat('Number of ', annot_name, ' overlapping loci that also have an eQTL: ', length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])), '\n')
+regionalSA_eqtl_vars  = unique(regionalAnnot$indexSNP[subjectHits(olap2)])
+cat('Number of ', annot_name, ' overlapping loci that also have an eQTL: ', length(unique(regionalSA_eqtl_vars$indexSNP[subjectHits(olap2)])), '\n')
 eqtlgenes = unique(eqtl.GR$gene_id[queryHits(olap2)])
         
 # Remove the . annotation
 eqtlgenes = sapply(eqtlgenes, function (x) {unlist(strsplit(x, ".", fixed=TRUE))[1]})
 
-if (length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
+if (length(unique(regionalSA_eqtl_vars$indexSNP[subjectHits(olap2)])) > 0) {
   
   # Convert these genes to hgnc_id
   mart = useMart(biomart="ENSEMBL_MART_ENSEMBL",
@@ -108,33 +108,32 @@ if (length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
                     values = eqtlgenes,
                     mart = mart)
   cat('These eQTLs impact ', length(which(geneannot == "protein_coding")), ' protein-coding eGenes\n')
-  #write.csv(geneannot, file = paste0(outDir, "/leftHem_SA_", annot_name, "_lr_eqtl_genes.csv"),
-            #row.names = FALSE, quote = FALSE)
+  write.csv(geneannot, file = paste0(outDir, "/leftHem_SA_", annot_name, "_lr_eqtl_genes.csv"),
+            row.names = FALSE, quote = FALSE)
   
 } else {
   print("There are not any CSA-associated variant - eQTL overlap")
 }
 
 if (length(regionalSA_vars) > 0) {
-  
-  # make a df with
+
   m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
   d = as.data.frame(m)
   colnames(d) = c("olap_snps", "eqtl_snps", "region")
-
+  
   d$olap_snps = regionalSA_vars
   d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
   d$region = "full_leftHem"
-
+  d$olap_snps[match(regionalSA_eqtl_vars, d$olap_snps)]
   write.csv(d, file = paste0(outDir, "/leftHem_SA_", annot_name, "_lr_olap_snps.csv"),
-          row.names = FALSE, quote = FALSE)
-  } else {
-    print("There are not any CSA-associated variants within this annotation")
+            row.names = FALSE, quote = FALSE)
+} else {
+  print("There are not any CSA-associated variants - annotation overlap")
 }
 
 
 #' 
-## ----fullSA_right------------------------------------------------------------------------------------
+## ----fullSA_right--------------------------------------------------------------------------------------------------------------------------------
 
 # Full surface area (RIGHT HEM.)
 # Start by getting all the clumped SNPs only for full surface area
@@ -183,14 +182,14 @@ regionalAnnot = LDSNPs[which(!is.na(match(LDSNPs$indexSNP, regionalSA_vars)))]
 cat('Number of loci that overlap with ', annot_name, ' is: ', length(unique(regionalAnnot$indexSNP)), '\n')
 
 olap2 = findOverlaps(eqtl.GR, regionalAnnot)
-regionalSA_eqtl_vars  =unique(regionalAnnot$indexSNP[subjectHits(olap2)])
-cat('Number of ', annot_name, ' overlapping loci that also have an eQTL: ', length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])), '\n')
+regionalSA_eqtl_vars = unique(regionalAnnot$indexSNP[subjectHits(olap2)])
+cat('Number of ', annot_name, ' overlapping loci that also have an eQTL: ', length(unique(regionalSA_eqtl_vars$indexSNP[subjectHits(olap2)])), '\n')
 eqtlgenes = unique(eqtl.GR$gene_id[queryHits(olap2)])
 
 # Remove the . annotation
 eqtlgenes = sapply(eqtlgenes, function (x) {unlist(strsplit(x, ".", fixed = TRUE))[1]})
 
-if (length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
+if (length(unique(regionalSA_eqtl_vars$indexSNP[subjectHits(olap2)])) > 0) {
   
   # Convert these genes to hgnc_id
   mart = useMart(biomart = "ENSEMBL_MART_ENSEMBL",
@@ -208,25 +207,24 @@ if (length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
 }
 
 if (length(regionalSA_vars) > 0) {
-  
-  # make a df with
+
   m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
   d = as.data.frame(m)
   colnames(d) = c("olap_snps", "eqtl_snps", "region")
-
+  
   d$olap_snps = regionalSA_vars
   d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
   d$region = "full_rightHem"
-
+  d$olap_snps[match(regionalSA_eqtl_vars, d$olap_snps)]
   write.csv(d, file = paste0(outDir, "/rightHem_SA_", annot_name, "_lr_olap_snps.csv"),
-          row.names = FALSE, quote = FALSE)
-  } else {
-    print("There are not any CSA-associated variants within this annotation")
+            row.names = FALSE, quote = FALSE)
+} else {
+  print("There are not any CSA-associated variants - annotation overlap")
 }
 
 
 #' 
-## ----regionalSA_left---------------------------------------------------------------------------------
+## ----regionalSA_left-----------------------------------------------------------------------------------------------------------------------------
 
 # All regional surface areas (LEFT HEM.)
 # Start by getting all the clumped SNPs only for any regional surface area
@@ -258,7 +256,7 @@ clump = clump[clump$SNP!=TRUE,]
     # Find all SNPs in LD (r2>0.6) with each clumped SNP
     system(paste0("module load plink/1.9b6 \
                    plink --bfile ", genotypeF, " --r2 --ld-window-kb 10000 --ld-window 2000 --ld-window-r2 0.6 --ld-snp ",
-                  clump$SNP[i], " --out reg_tmpld_", annot_name))
+                  clump$SNP[i], " --out tmpld_", annot_name))
     
     # Read in the LD calculated from plink
     LD = read.table(paste0("reg_tmpld_", annot_name, ".ld"), header = TRUE)
@@ -285,7 +283,7 @@ regionalAnnot = LDSNPs[which(!is.na(match(LDSNPs$indexSNP, regionalSA_vars)))]
 cat('Number of loci that overlap with ', annot_name, ' is: ', length(unique(regionalAnnot$indexSNP)), '\n')
 
 olap2 = findOverlaps(eqtl.GR, regionalAnnot)
-regionalSA_eqtl_vars  = unique(regionalAnnot$indexSNP[subjectHits(olap2)])
+regionalSA_eqtl_vars  =unique(regionalAnnot$indexSNP[subjectHits(olap2)])
 cat('Number of ', annot_name, ' overlapping loci that also have an eQTL: ', length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])), '\n')
 eqtlgenes = unique(eqtl.GR$gene_id[queryHits(olap2)])
   
@@ -302,33 +300,30 @@ if (length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
                     filters = "ensembl_gene_id", values = eqtlgenes,mart = mart)
   cat('These eQTLs impact ', length(which(geneannot == "protein_coding")), ' protein-coding eGenes\n')
   write.csv(geneannot, file = paste0(outDir, "/regionalSA_le_", annot_name, "_lr_eqtl_genes.csv"), row.names = FALSE, quote = FALSE)
-  
 
 } else {
   print("There are not any CSA-associated variant - eQTL overlap")
 }
 
-
 if (length(regionalSA_vars) > 0) {
-  
-  # make a df with
+
   m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
   d = as.data.frame(m)
   colnames(d) = c("olap_snps", "eqtl_snps", "region")
-
+  
   d$olap_snps = regionalSA_vars
   d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
   d$region = clump[match(regionalSA_vars, clump$SNP),]$region
-
+  
   write.csv(d, file = paste0(outDir, "/regionalSA_le_", annot_name, "_lr_olap_snps.csv"),
-          row.names = FALSE, quote = FALSE)
-  } else {
-    print("There are not any CSA-associated variants within this annotation")
+            row.names = FALSE, quote = FALSE)
+} else {
+  print("There are not any CSA-associated variants - annotation overlap")
 }
 
 
 #' 
-## ----regionalSA_right--------------------------------------------------------------------------------
+## ----regionalSA_right----------------------------------------------------------------------------------------------------------------------------
 
 # All regional surface areas (RIGHT HEM.)
 # Start by getting all the clumped SNPs only for any regional surface area
@@ -360,7 +355,7 @@ for (i in 1:nrow(clump)) {
   # Find all SNPs in LD (r2>0.6) with each clumped SNP
     system(paste0("module load plink/1.9b6 \
                    plink --bfile ", genotypeF, " --r2 --ld-window-kb 10000 --ld-window 2000 --ld-window-r2 0.6 --ld-snp ",
-                  clump$SNP[i], " --out reg_tmpld_", annot_name))
+                  clump$SNP[i], " --out tmpld_", annot_name))
   
   # Read in the LD calculated from plink
   LD = read.table(paste0("reg_tmpld_", annot_name, ".ld"), header = TRUE)
@@ -410,26 +405,24 @@ if (length(unique(regionalAnnot$indexSNP[subjectHits(olap2)])) > 0) {
 }
 
 if (length(regionalSA_vars) > 0) {
-  
-  # make a df with
+
   m = matrix(NA, nrow = length(regionalSA_vars), ncol = 3)
   d = as.data.frame(m)
   colnames(d) = c("olap_snps", "eqtl_snps", "region")
-
+  
   d$olap_snps = regionalSA_vars
   d$eqtl_snps[match(regionalSA_eqtl_vars, d$olap_snps)] = "Yes"
   d$region = clump[match(regionalSA_vars, clump$SNP),]$region
-
+  
   write.csv(d, file = paste0(outDir, "/regionalSA_ri_", annot_name, "_lr_olap_snps.csv"),
-          row.names = FALSE, quote = FALSE)
-  } else {
-    print("There are not any CSA-associated variants within this annotation")
+            row.names = FALSE, quote = FALSE)
+} else {
+  print("There are not any CSA-associated variants - annotation overlap")
 }
 
 
-
 #' 
-## ----------------------------------------------------------------------------------------------------
+## ------------------------------------------------------------------------------------------------------------------------------------------------
 sessionInfo()
-knitr::purl("overlap_analysis_eQTL.Rmd", "overlap_analysis_eQTL.R", documentation = 2) # save .Rmd as an .R file to submit to Grid
+#knitr::purl("overlap_analysis_eQTL.Rmd", "overlap_analysis_eQTL.R", documentation = 2) # save .Rmd as an .R file to submit to Grid
 
