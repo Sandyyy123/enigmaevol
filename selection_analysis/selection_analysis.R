@@ -77,20 +77,22 @@ make_CSA_region_list_only_rsIDs = function(clumpedDir) {
 
 # Go run SNPsnap with the rsID lists!
 
-run_plink_ld = function(genotypeFile, controlVars, outDir) {
-  # runs plink --ld in control snps
-  
-  controlVarsTable = read.table(controlVars, header = T)
-  controlVarsTable = controlVarsTable[controlVarsTable$input_snp == args[1],]
-  i=1
-  for (i in 1:nrow(controlVarsTable)) {
-    system(paste0("module load plink/1.9b6 \
-                   plink --bfile ", genotypeFile, " --r2 dprime --ld-snp ", 
-                  controlVarsTable$rsID[i], " --ld-window-kb 1000 --ld-window 99999 --ld-window-r2 0.9 --out ",
-                  outDir, "/", controlVarsTable$input_snp[i], "_", controlVarsTable$set[i], "_", 
-                  controlVarsTable$rsID[i]))
-    }
-}
+## Run plink on 5k control variants to generate SNPs in LD with them
+## do this ON GRID, it takes forever on lux13.
+#run_plink_ld = function(genotypeFile, controlVars, outDir) {
+#  # runs plink --ld in control snps
+#  
+#  controlVarsTable = read.table(controlVars, header = T)
+#  #controlVarsTable = controlVarsTable[controlVarsTable$input_snp == args[1],] - what did I think here? Leaving this out until I remember why I added this.
+#  
+#  for (i in 1:nrow(controlVarsTable)) {
+#    system(paste0("module load plink/1.9b6 \
+#                   plink --bfile ", genotypeFile, " --r2 dprime --ld-snp ", 
+#                  controlVarsTable$rsID[i], " --ld-window-kb 1000 --ld-window 99999 --ld-window-r2 0.9 --out ",
+#                  outDir, "/", controlVarsTable$input_snp[i], "_", controlVarsTable$set[i], "_", 
+#                  controlVarsTable$rsID[i]))
+#    }
+#}
 
 extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDbuddies, outDir) {
   # exracts lead SNP info from .clumped files
