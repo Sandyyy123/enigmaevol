@@ -11,6 +11,9 @@ args = commandArgs(trailingOnly=TRUE)
 options(stringsAsFactors=FALSE)
 library(GenomicRanges)
 library(biomaRt)
+library(circlize)
+library(tidyr)
+library(knitr)
 ```
 
 ## R Markdown
@@ -421,6 +424,121 @@ if (length(regionalSA_vars) > 0) {
 }
 
 ```
+
+## Circular plot
+                y = sample("Full left-hemisphere", 
+                    "Pars opercularis",
+                    "Lingual",
+                    "Pars orbitalis",
+                    "Cuneus", n, replace = T)
+```{r}
+set.seed(999)
+n = 100
+df = data.frame(sectors = sample(letters[1:8], n, replace = TRUE),
+    x = rnorm(n), y = runif(n))
+
+df = data.frame(sectors = sample(c("Neanderthal Depleted", 
+                            "Foetal HGEs",
+                            "Adult HGEs",
+                            "Neanderthal Reintroduced",
+                            "Human-specific Duplications",
+                            "Full left-hemisphere", 
+                            "Pars opercularis",
+                            "Lingual",
+                            "Pars orbitalis",
+                            "Cuneus"), n, replace = T),
+                x = rnorm(n), y = runif(n))
+
+circos.par("track.height" = 0.1)
+#circos.par(gap.after = c(rep(1, 23), 5, rep(1, 20), 5))
+circos.initialize(df$sectors, x = df$x)
+
+circos.track(df$sectors, y = df$y,
+    panel.fun = function(x, y) {
+        circos.text(CELL_META$xcenter, 
+            CELL_META$cell.ylim[2] + mm_y(5), 
+            CELL_META$sector.index)
+        circos.axis(labels.cex = 0.6)
+})
+col = rep(c("#FF0000", "#00FF00"), 5)
+circos.trackPoints(df$sectors, df$x, df$y, col = col, pch = 16, cex = 0.5)
+#circos.text(-1, 0.5, "text", sector.index = "Neanderthal Depleted", track.index = 1)
+#bgcol = rep(c("#EFEFEF", "#CCCCCC"), 5)
+#circos.trackHist(df$sectors, df$x, bin.size = 0.2, bg.col = bgcol, col = NA)
+
+circos.link("Neanderthal Depleted", 0, "Pars opercularis", 0, h = 0.4, col = "green")
+circos.link("c", c(-0.5, 0.5), "d", c(-0.5,0.5), col = "red",
+    border = "blue", h = 0.2)
+circos.link("e", 0, "g", c(-1,1), col = "green", border = "black", lwd = 2, lty = 2)
+circos.clear()
+```
+```{r}
+gwas_hit_snps=read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/gwas_hit_snps.txt")
+colnames(gwas_hit_snps)=c("SNP", "A1", "A2", "FREQ1", "BETA",
+                          "SE", "P", "N", "MARKER", "CHR", "BP", "INFO")
+snp_region_list=read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/all_eqtl_regLeft.txt", header=T)
+
+ultimate_super_df = merge(gwas_hit_snps, snp_region_list, by="SNP")
+
+nondup_df = ultimate_super_df[!duplicated(ultimate_super_df), ]
+ordered_df = nondup_df[order(nondup_df$P),]
+
+ordered_df[ordered_df$SNP=="rs11423823",]
+
+for_table = ordered_df[1:40,c("SNP", "A1", "FREQ1", 
+                              "BETA", "SE", "P", "MARKER",
+                              "brain_region", "annot", "eQTL")]
+
+table_df = kable(for_table, row.names = F, format = "html", digits = 60, format.args = list(scientific = T), 
+                 escape = F, align = "c",  table.attr = "style = \"color: black;\"") %>%
+                  kable_styling(bootstrap_options = "striped", full_width = F, html_font = "Cambria", font_size = 15)
+library(kableExtra)
+library(knitr)
+kable(table_df, format="latex", booktabs=TRUE) %>% 
+  kable_styling(latex_options="scale_down")
+
+kable(table_df, "latex", longtable = T, booktabs = T) %>%
+  kable_styling(font_size = 7)
+
+save_kable(table_df,"/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/top20_snps_table.png")
+
+circos_df = ultimate_super_df[,c("BETA", "P", "brain_region", "annot")]
+circos_df1 = circos_df[c(3, 2, 1)]
+colnames(circos_df1) = c("sectors", "x", "y")
+circos_df2 = circos_df[c(4, 2, 1)]
+colnames(circos_df2) = c("sectors", "x", "y")
+
+df2 = rbind(circos_df1, circos_df2)
+
+# make it smaller to test
+df2 = df2[1:80,]
+
+circos.par("track.height" = 0.1)
+#circos.par$cell.padding[c(2,4)]=0
+circos.initialize(df2$sectors, x = df2$x)
+circos.track(df$sectors, y = df$y,
+    panel.fun = function(x, y) {
+        circos.text(CELL_META$xcenter, 
+            CELL_META$cell.ylim[2] + mm_y(5), 
+            CELL_META$sector.index)
+        circos.axis(labels.cex = 0.6)
+})
+
+circos.link("a", 0, "zoom_a", 0, h = 0.4, col = "green")
+circos.link("c", c(-0.5, 0.5), "d", c(-0.5,0.5), col = "red",
+    border = "blue", h = 0.2)
+circos.link("e", 0, "b", c(-1,1), col = "green", border = "black", lwd = 2, lty = 2)
+
+circos.link("a", get.cell.meta.data("cell.xlim", sector.index = "a"),
+    "zoom_a", get.cell.meta.data("cell.xlim", sector.index = "zoom_a"),
+    border = NA, col = "#00000020")
+circos.link("b", c(zoom_df_b[1, 2], zoom_df_b[10, 2]),
+    "zoom_b", get.cell.meta.data("cell.xlim", sector.index = "zoom_b"),
+    rou1 = get.cell.meta.data("cell.top.radius", sector.index = "b"),
+    border = NA, col = "#00000020")
+circos.clear()
+```
+
 
 ```{r}
 sessionInfo()
