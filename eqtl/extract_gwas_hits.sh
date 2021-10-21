@@ -3,7 +3,7 @@
 # This script will extract info of genome-wide significant SNPs
 # from the relevant summary stats file.
 
-var_list='/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/regLeft_list_clean.txt'
+var_list='/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/all_eqtl_regLeft.txt'
 outDir='/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results'
 
 #set -xv
@@ -13,9 +13,9 @@ while read line; do
 	rsID=$(cut -d'	' -f2 <<< $line)
 	region=$(cut -d'	' -f1 <<< $line)
 
-#	sumstat="/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/sumstats_ukb43760_regionalDK_surface_le_${region}_withGlob_european_allChr.txt"
-	sumstat="sumstats_ukb43760_regionalDK_surface_le_${region}_withGlob_european_allChr.txt"
+	sumstat="/data/clusterfs/lag/users/gokala/enigma-evol/data/european_lr/sumstats_ukb43760_regionalDK_surface_le_${region}_withGlob_european_allChr.txt"
+#	sumstat="sumstats_ukb43760_regionalDK_surface_le_${region}_withGlob_european_allChr.txt"
 	
-	grep -Fw $rsID $sumstat >> test_file.txt
+	grep -Fw $rsID $sumstat >> ${outDir}/eqtl_snps_info.txt
 
 done < $var_list

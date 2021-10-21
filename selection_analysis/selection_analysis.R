@@ -22,7 +22,8 @@ options(stringsAsFactors=FALSE)
 #--------------------------------------------
 # PATHS
 
-clumpedDir="/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5/right"
+clumpedDir="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/data/preterm_birth_sumstats"
+#"/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5/right"
 #"/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5/left"
 genotypeFile = "/data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/plink/1KG_phase3_GRCh37_EUR_nonFIN_allchr"
 controlVars = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/SNPsnap_eur_right/matched_snps_annotated_subset.filtered.txt"
@@ -33,21 +34,26 @@ clumpedControls = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_
 #--------------------------------------------
 # FUNCTIONS
 
+preterm_birth_snps = read.csv("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/41467_2020_17258_MOESM5_ESM.csv",
+                              header = T)
+preterm_birth_snps$LEAD.SNP.chr.pos.
+length(setdiff(preterm_birth_snps$LEAD.SNP.chr.pos.,clumpedSNPs$MARKER))
+length(setdiff(clumpedSNPs$MARKER,preterm_birth_snps$LEAD.SNP.chr.pos.))
+
 #assure_dir_exists #TODO
-
 #check_for_plink_error #TODO
-
+#i="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/data/preterm_birth_sumstats/clumped_mygenotypeFiles/chr10_pre_top10000.clumped"
 make_CSA_region_list = function(clumpedDir) {
   # gather rsID and TOTAL info lead SNPs from
   # each summary stats
   clumpedSNPs = data.frame()
-  for (i in dir(clumpedDir, full.names = T, pattern = "clumped")) {
-      region = sapply(i, function (x) {unlist(strsplit(as.character(x),"_",fixed=TRUE))[9]})
+  for (i in dir(clumpedDir, full.names = T, pattern = ".clumped")) {
+      #region = sapply(i, function (x) {unlist(strsplit(as.character(x),"_",fixed=TRUE))[9]})
       tmp_clump = read.table(i, header = TRUE)
-      tmp_df = data.frame(SNP = tmp_clump$SNP, TOTAL = tmp_clump$TOTAL)
+      tmp_df = data.frame(SNP = tmp_clump$SNP, TOTAL = tmp_clump$TOTAL, MARKER = paste0(tmp_clump$CHR, ":", tmp_clump$BP))
       clumpedSNPs = rbind(clumpedSNPs, tmp_df)
   }
-  write.table(clumpedSNPs,paste0(clumpedDir,"/snpsnap_list/surface_area_all.txt"),row.names = F, col.names = F, quote = F)
+  #write.table(clumpedSNPs,paste0(clumpedDir,"/snpsnap_list/surface_area_all.txt"),row.names = F, col.names = F, quote = F)
 }
 
 make_CSA_region_list_only_rsIDs = function(clumpedDir) {
@@ -224,7 +230,7 @@ extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDb
         }
       }
             
-      write.table(tmp_df, file = paste0(outDir, "/CSAregions/", working_indeces[i,2], ".txt")
+      write.table(tmp_df, file = paste0(outDir, "/CSAregions/", working_indeces[ i,2], ".txt")
                   , quote = F, row.names = F, col.names = F, sep = "\t")
     }
     

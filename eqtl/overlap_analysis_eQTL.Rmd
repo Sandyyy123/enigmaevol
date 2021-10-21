@@ -433,45 +433,183 @@ if (length(regionalSA_vars) > 0) {
                     "Cuneus", n, replace = T)
 ```{r}
 set.seed(999)
-n = 100
-df = data.frame(sectors = sample(letters[1:8], n, replace = TRUE),
-    x = rnorm(n), y = runif(n))
+mat = matrix(sample(10, 10), 5, 5) 
+rownames(mat) = paste0("Region", 1:5)
+colnames(mat) = paste0("Annot", 1:5)
+mat
 
-df = data.frame(sectors = sample(c("Neanderthal Depleted", 
-                            "Foetal HGEs",
-                            "Adult HGEs",
-                            "Neanderthal Reintroduced",
-                            "Human-specific Duplications",
-                            "Full left-hemisphere", 
+rownames(mat) = c("Full left-hemisphere", 
                             "Pars opercularis",
                             "Lingual",
                             "Pars orbitalis",
-                            "Cuneus"), n, replace = T),
-                x = rnorm(n), y = runif(n))
+                            "Cuneus")
 
-circos.par("track.height" = 0.1)
-#circos.par(gap.after = c(rep(1, 23), 5, rep(1, 20), 5))
-circos.initialize(df$sectors, x = df$x)
+colnames(mat) = c("Neanderthal Depleted", 
+                            "Foetal HGEs",
+                            "Adult HGEs",
+                            "Neanderthal Reintroduced",
+                            "Human-specific Duplications")
+                   
 
-circos.track(df$sectors, y = df$y,
-    panel.fun = function(x, y) {
-        circos.text(CELL_META$xcenter, 
-            CELL_META$cell.ylim[2] + mm_y(5), 
-            CELL_META$sector.index)
-        circos.axis(labels.cex = 0.6)
-})
-col = rep(c("#FF0000", "#00FF00"), 5)
-circos.trackPoints(df$sectors, df$x, df$y, col = col, pch = 16, cex = 0.5)
-#circos.text(-1, 0.5, "text", sector.index = "Neanderthal Depleted", track.index = 1)
-#bgcol = rep(c("#EFEFEF", "#CCCCCC"), 5)
-#circos.trackHist(df$sectors, df$x, bin.size = 0.2, bg.col = bgcol, col = NA)
-
-circos.link("Neanderthal Depleted", 0, "Pars opercularis", 0, h = 0.4, col = "green")
-circos.link("c", c(-0.5, 0.5), "d", c(-0.5,0.5), col = "red",
-    border = "blue", h = 0.2)
-circos.link("e", 0, "g", c(-1,1), col = "green", border = "black", lwd = 2, lty = 2)
 circos.clear()
+
+overlap_snps_sumstats = read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/eqtl_snps_info.txt")
+all_eqtl_regLeft = read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/all_eqtl_regLeft.txt")
+all_eqtl_regLeft$V5 = overlap_snps_sumstats$V7
+df_plot = all_eqtl_regLeft[, c("V1", "V3", "V5")]
+
+#########################################################
+
+# Initial plot
+pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/regLeftHem_overlaps2.png", width = 10, height = 10)
+
+grid.col = structure(1:(length(unique(df_plot$V1)) + length(unique(df_plot$V3))), 
+                     names = c(unique(df_plot$V1), unique(df_plot$V3)))
+
+chordDiagram(df_plot, grid.col = grid.col, annotationTrack = "grid", 
+    preAllocateTracks = list(track.height = max(strwidth(unlist(dimnames(df_plot))))))
+
+circos.track(track.index = 1, panel.fun = function(x, y) {
+    circos.text(CELL_META$xcenter, CELL_META$ylim[1], CELL_META$sector.index, 
+        facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+}, bg.border = NA) # here set bg.border to NA is important
+
+dev.off()
+circos.clear()
+
+# Scaled version
+pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/regLeftHem_overlaps_scaled.pdf", width = 10, height = 10)
+
+grid.col = structure(1:(length(unique(df_plot$V1)) + length(unique(df_plot$V3))), 
+                     names = c(unique(df_plot$V1), unique(df_plot$V3)))
+
+chordDiagram(df_plot, grid.col = grid.col, annotationTrack = "grid", 
+    preAllocateTracks = list(track.height = max(strwidth(unlist(dimnames(df_plot))))), scale = TRUE)
+
+circos.track(track.index = 1, panel.fun = function(x, y) {
+    circos.text(CELL_META$xcenter, CELL_META$ylim[1], CELL_META$sector.index, 
+        facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+}, bg.border = NA) # here set bg.border to NA is important
+
+dev.off()
+circos.clear()
+
+# Lines colored based on p-value
+pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/regLeftHem_overlaps_orangeLinks.pdf", width = 10, height = 10)
+
+grid.col = structure(1:(length(unique(df_plot$V1)) + length(unique(df_plot$V3))), 
+                     names = c(unique(df_plot$V1), unique(df_plot$V3)))
+
+col_fun = colorRamp2(range(df_plot$V5), c("#ED6B06", "#8E4114"), transparency = 0.5)
+
+chordDiagram(df_plot, grid.col = grid.col, col = col_fun, 
+             annotationTrack = "grid", 
+             preAllocateTracks = list(track.height = max(strwidth(unlist(dimnames(df_plot))))))
+
+circos.track(track.index = 1, panel.fun = function(x, y) {
+    circos.text(CELL_META$xcenter, CELL_META$ylim[1], CELL_META$sector.index, 
+        facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+}, bg.border = NA) # here set bg.border to NA is important
+
+dev.off()
+circos.clear()
+
+# Lines colored based on p-value
+pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/regLeftHem_overlaps_orangeLinks_scaled.pdf", width = 10, height = 10)
+
+grid.col = structure(1:(length(unique(df_plot$V1)) + length(unique(df_plot$V3))), 
+                     names = c(unique(df_plot$V1), unique(df_plot$V3)))
+
+col_fun = colorRamp2(range(df_plot$V5), c("#ED6B06", "#8E4114"), transparency = 0.5)
+
+chordDiagram(df_plot, grid.col = grid.col, col = col_fun, 
+             annotationTrack = "grid", 
+             preAllocateTracks = list(track.height = max(strwidth(unlist(dimnames(df_plot))))), scale = TRUE)
+
+circos.track(track.index = 1, panel.fun = function(x, y) {
+    circos.text(CELL_META$xcenter, CELL_META$ylim[1], CELL_META$sector.index, 
+        facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+}, bg.border = NA) # here set bg.border to NA is important
+
+dev.off()
+circos.clear()
+
+# Colors organized + MPI palette used + df columns switched
+df_plot = df_plot[,c(2,1,3)]
+
+pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/regLeftHem_overlaps_mpipalette.pdf", width = 10, height = 10)
+
+grid.col = c("adult_hge" = "#00786A", "AMH_derived_DMR" = "#ED6B06", "AMH_derived_noncoding_fixedVars" = "#7F206E",
+             "ancient_selective_sweeps" = "#AA1926", "archaic_derived_DMR" = "#214D9D", "denisovan_derived_DMR" = "#5FA131", 
+             "fetal_hge" = "#49A7DE", "HAR" = "#EEA300", "human-chimp_DMR" = "#80BBB4",
+             "human-spec_DMR" = "#F7B682", "nean_introg_SNPs" = "#BF8FB6", "nean_RA" = "#D48C92",
+             "nean_depleted" = "#90A5CE", "neanderthal_derived_DMR" = "#AFD199",
+             "lateralorbitofrontal" = "grey", "isthmuscingulate" = "grey", "superiorparietal" = "grey",
+             "middletemporal" = "grey", "lingual" = "grey", "pericalcarine" = "grey",
+             "lateraloccipital" = "grey", "superiortemporal" = "grey", "precentral" = "grey",
+             "precuneus" = "grey", "caudalmiddlefrontal" = "grey", "parstriangularis" = "grey",
+             "parsorbitalis" = "grey", "cuneus" = "grey", "insula" = "grey",
+             "posteriorcingulate" = "grey", "fusiform" = "grey", "postcentral" = "grey",
+             "entorhinal" = "grey", "superiorfrontal" = "grey", "inferiorparietal" = "grey",
+             "inferiortemporal" = "grey", "bankssts" = "grey", "transversetemporal" = "grey",
+             "supramarginal" = "grey", "rostralmiddlefrontal" = "grey", "paracentral" = "grey",
+             "medialorbitofrontal" = "grey", "caudalanteriorcingulate" = "grey")
+
+#col_fun = colorRamp2(range(df_plot$V5), c("#ED6B06", "#8E4114"), transparency = 0.5)
+
+chordDiagram(df_plot, grid.col = grid.col,
+             annotationTrack = "grid", 
+             row.col = 1:length(unique(df_plot$V3)),
+             preAllocateTracks = list(track.height = max(strwidth(unlist(dimnames(df_plot))))))
+
+circos.track(track.index = 1, panel.fun = function(x, y) {
+    circos.text(CELL_META$xcenter, CELL_META$ylim[1], CELL_META$sector.index, 
+        facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+}, bg.border = NA) # here set bg.border to NA is important
+
+dev.off()
+circos.clear()
+
+# Colors organized + MPI palette used + df columns switched + scaled
+df_plot = df_plot[,c(2,1,3)]
+
+pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/regLeftHem_overlaps_mpipalette_scaled.pdf", width = 10, height = 10)
+
+grid.col = c("adult_hge" = "#00786A", "AMH_derived_DMR" = "#ED6B06", "AMH_derived_noncoding_fixedVars" = "#7F206E",
+             "ancient_selective_sweeps" = "#AA1926", "archaic_derived_DMR" = "#214D9D", "denisovan_derived_DMR" = "#5FA131", 
+             "fetal_hge" = "#49A7DE", "HAR" = "#EEA300", "human-chimp_DMR" = "#80BBB4",
+             "human-spec_DMR" = "#F7B682", "nean_introg_SNPs" = "#BF8FB6", "nean_RA" = "#D48C92",
+             "nean_depleted" = "#90A5CE", "neanderthal_derived_DMR" = "#AFD199",
+             "lateralorbitofrontal" = "grey", "isthmuscingulate" = "grey", "superiorparietal" = "grey",
+             "middletemporal" = "grey", "lingual" = "grey", "pericalcarine" = "grey",
+             "lateraloccipital" = "grey", "superiortemporal" = "grey", "precentral" = "grey",
+             "precuneus" = "grey", "caudalmiddlefrontal" = "grey", "parstriangularis" = "grey",
+             "parsorbitalis" = "grey", "cuneus" = "grey", "insula" = "grey",
+             "posteriorcingulate" = "grey", "fusiform" = "grey", "postcentral" = "grey",
+             "entorhinal" = "grey", "superiorfrontal" = "grey", "inferiorparietal" = "grey",
+             "inferiortemporal" = "grey", "bankssts" = "grey", "transversetemporal" = "grey",
+             "supramarginal" = "grey", "rostralmiddlefrontal" = "grey", "paracentral" = "grey",
+             "medialorbitofrontal" = "grey", "caudalanteriorcingulate" = "grey")
+
+#col_fun = colorRamp2(range(df_plot$V5), c("#ED6B06", "#8E4114"), transparency = 0.5)
+
+chordDiagram(df_plot, grid.col = grid.col,
+             annotationTrack = "grid", 
+             row.col = 1:length(unique(df_plot$V3)),
+             preAllocateTracks = list(track.height = max(strwidth(unlist(dimnames(df_plot))))), 
+             scale = TRUE)
+
+circos.track(track.index = 1, panel.fun = function(x, y) {
+    circos.text(CELL_META$xcenter, CELL_META$ylim[1], CELL_META$sector.index, 
+        facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5))
+}, bg.border = NA) # here set bg.border to NA is important
+
+dev.off()
+circos.clear()
+
+######################################################## 
 ```
+
 ```{r}
 gwas_hit_snps=read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/gwas_hit_snps.txt")
 colnames(gwas_hit_snps)=c("SNP", "A1", "A2", "FREQ1", "BETA",
@@ -501,6 +639,9 @@ kable(table_df, "latex", longtable = T, booktabs = T) %>%
   kable_styling(font_size = 7)
 
 save_kable(table_df,"/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/european_lr/results/results/top20_snps_table.png")
+
+
+#################################
 
 circos_df = ultimate_super_df[,c("BETA", "P", "brain_region", "annot")]
 circos_df1 = circos_df[c(3, 2, 1)]
@@ -537,6 +678,28 @@ circos.link("b", c(zoom_df_b[1, 2], zoom_df_b[10, 2]),
     rou1 = get.cell.meta.data("cell.top.radius", sector.index = "b"),
     border = NA, col = "#00000020")
 circos.clear()
+
+library(yaml)
+data = yaml.load_file("https://raw.githubusercontent.com/Templarian/slack-emoji-pokemon/master/pokemon.yaml")
+set.seed(123)
+pokemon_list = data$emojis[sample(length(data$emojis), 40)]
+pokemon_name = sapply(pokemon_list, function(x) x$name)
+pokemon_src = sapply(pokemon_list, function(x) x$src)
+
+library(EBImage)
+circos.par("points.overflow.warning" = FALSE)
+circos.initialize(pokemon_name, xlim = c(0, 1))
+circos.track(ylim = c(0, 1), panel.fun = function(x, y) {
+    pos = circlize:::polar2Cartesian(circlize(CELL_META$xcenter, CELL_META$ycenter))
+    image = EBImage::readImage(pokemon_src[CELL_META$sector.numeric.index])
+    circos.text(CELL_META$xcenter, CELL_META$cell.ylim[1] - mm_y(2),
+        CELL_META$sector.index, facing = "clockwise", niceFacing = TRUE,
+        adj = c(1, 0.5), cex = 0.6)
+    rasterImage(image, 
+        xleft = pos[1, 1] - 0.05, ybottom = pos[1, 2] - 0.05,
+        xright = pos[1, 1] + 0.05, ytop = pos[1, 2]+ 0.05)
+}, bg.border = 1, track.height = 0.15)
+
 ```
 
 

@@ -69,6 +69,25 @@ brainplot_TH(dta = HSE_7pcw_TH,
              low_color = "#ED6B06",
              high_color = "#00786A")
 
+# Plots tagging each region. Will be used for the eQTL plot.
+HSE_7pcw <- read.delim("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/partitioned_heritability/final_results/european_lr/results_tables/left/neanDepRegions_hg19.sorted_results_FDR34.txt", header = TRUE)
+HSE_7pcw$Region <- factor(HSE_7pcw$Region,levels=regionordering$Region)
+HSE_7pcw_SA <- HSE_7pcw %>% dplyr::filter(Analysis == "Surface Area")
+HSE_7pcw_SA$Enrichment_plot <- 0
+HSE_7pcw_SA$Enrichment_plot[34] <- 10
+
+brainplot_SA(dta = HSE_7pcw_SA,
+             out_prefix = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/eqtl/brain_regions/",
+             out_suffix = "brain_regions",
+             loop_over = "Annotation",
+             region_col = "Region",
+             Z_col = "Enrichment_plot",
+             analysis_col = "Analysis",
+             max_val = enrich_maxSA,
+             low_color = "#ED6B06",
+             high_color = "dark blue",
+             nonsig_color = "#BABABC")
+
 ############################################
 # Same plots for L-R partitioned h2 results#
 ############################################
