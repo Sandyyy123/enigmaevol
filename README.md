@@ -53,6 +53,3 @@ Use `AncestryRegression_noGC.R` and `run_AncestryRegression_noGC.sh`.
 Download SDS values for each SNP from: https://datadryad.org/resource/doi:10.5061/dryad.kd58f.
 Run a correalation analysis between SDS values and GWAS effect sizes using `run_Blocked_Jackknife_clumpedSNPs_gr_forqsub.sh` and `Blocked_Jackknife_clumpedSNPs_gr_forqsub.R`.
 Plot results with `plotSDS_ancreg1KGPphase3_noGC_MA6.R`.
-
-## Partitioned Heritability
-If you will run partitioned heritability by using annotation, make a list of your annotations with 2 columns (`annots` and `baseline`). with your annotations and save as annots_and_baselines.csv
