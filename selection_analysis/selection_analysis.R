@@ -26,10 +26,14 @@ clumpedDir="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/en
 #"/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5/right"
 #"/data/clusterfs/lag/users/gokala/enigma-evol/selection_analysis/clumped_sumstats/european_lr/clumped_sumstats_p10e-5/left"
 genotypeFile = "/data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/plink/1KG_phase3_GRCh37_EUR_nonFIN_allchr"
-controlVars = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/SNPsnap_eur_right/matched_snps_annotated_subset.filtered.txt"
-outDir= "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/right"
-leadSNPlist = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave/working_snps.txt"
-clumpedControls = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave"
+#controlVars = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/SNPsnap_eur_right/matched_snps_annotated_subset.filtered.txt"
+controlVars = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication/SNPsnap_preterm_birth/matched_snps_annotated_subset.filtered.txt"
+#outDir= "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/right"
+outDir= "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication"
+#leadSNPlist = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave/working_snps.txt"
+leadSNPlist = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication/SNPsnap_preterm_birth/input_snps_identifer_mapping.txt"
+#clumpedControls = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave"
+clumpedControls = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication"
 
 #--------------------------------------------
 # FUNCTIONS
@@ -53,7 +57,7 @@ make_CSA_region_list = function(clumpedDir) {
       tmp_df = data.frame(SNP = tmp_clump$SNP, TOTAL = tmp_clump$TOTAL, MARKER = paste0(tmp_clump$CHR, ":", tmp_clump$BP))
       clumpedSNPs = rbind(clumpedSNPs, tmp_df)
   }
-  #write.table(clumpedSNPs,paste0(clumpedDir,"/snpsnap_list/surface_area_all.txt"),row.names = F, col.names = F, quote = F)
+  write.table(clumpedSNPs,paste0(clumpedDir,"/snpsnap_list/preterm_birth_clumped_snps.txt"),row.names = F, col.names = F, quote = F)
 }
 
 make_CSA_region_list_only_rsIDs = function(clumpedDir) {
@@ -84,7 +88,8 @@ make_CSA_region_list_only_rsIDs = function(clumpedDir) {
 # Go run SNPsnap with the rsID lists!
 
 ## Run plink on 5k control variants to generate SNPs in LD with them
-## do this ON GRID, it takes forever on lux13.
+## do this ON GRID, it takes forever on lux13. I wrote a separate bash script for this.
+
 #run_plink_ld = function(genotypeFile, controlVars, outDir) {
 #  # runs plink --ld in control snps
 #  
@@ -105,16 +110,19 @@ extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDb
   
   # Extract MARKER, rsID, LD-buddy number (TOTAL) and LD-buddies info.
   # from .clumped files.
-  working_snps = read.table(leadSNPlist)
-  surface = dir(clumpedDir, pattern = "surface", full.names = T)
+  working_snps = read.table(leadSNPlist, header = T)
+  working_snps = working_snps[-20,]
+  working_snps = working_snps[-10,] # removed rs10626327 and rs145800817, because they are not in my clumped SNPs list, whereas they are in LaBella et al.
+  #surface = dir(clumpedDir, pattern = "surface", full.names = T)
+  surface = dir(clumpedDir, pattern = ".clumped", full.names = T)
   all_variants = data.frame(MARKER = character(),
                             rsID = character(),
                             TOTAL = character(),
                             LDbuds = character(),
                             stringsAsFactors = F)
   k = 1
-  for (i in 1:length(grep(surface, pattern = "top10k.clumped", value = T))) {
-    tmp_var = read.table(grep(surface, pattern = "top10k.clumped", value = T)[i], header = T)
+  for (i in 1:length(grep(surface, pattern = ".clumped", value = T))) { #top10k.clumped
+    tmp_var = read.table(grep(surface, pattern = ".clumped", value = T)[i], header = T) #top10k.clumped
     
     for (j in 1:nrow(tmp_var)){
       all_variants[k+(j-1),] = c(paste0(tmp_var$CHR[j],":", tmp_var$BP[j]),
@@ -134,12 +142,13 @@ extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDb
                                 stringsAsFactors = F)
   
   for (i in 1:nrow(working_snps)) {
-    working_indeces[i,] = all_variants[which(all_variants$rsID == working_snps$V2[i]),]
+    working_indeces[i,] = all_variants[which(all_variants$rsID == working_snps$rsID[i]),]
   }
   
   # Remove (1)s from LD-buddy rsIDs
   
   working_indeces$LDbuds = gsub("\\(1\\)", "", working_indeces$LDbuds)
+  working_indeces$MARKER = gsub(":", "_", working_indeces$MARKER)
   
   # Create a df per lead SNP. Fill it with the following:
   # MARKER  rsID  TOTAL LDbuddy1  LDbuddy2  ... LDbuddyN
@@ -184,7 +193,7 @@ extract_leadSNP_info = function(clumpedDir, leadSNPlist, controlVars, controlLDb
         }
       }
       
-      # LD buddies of dear lead SNPs have only rsIDs. We have to convert them to 
+      # LD buddies of lead SNPs have only rsIDs. We have to convert them to 
       # markers to get the evol measures in the next step.
       
       for (m in 2:ncol(tmp_df)) {

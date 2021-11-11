@@ -14,6 +14,7 @@ library(biomaRt)
 library(circlize)
 library(tidyr)
 library(knitr)
+library(Gviz)
 ```
 
 ## R Markdown
@@ -700,6 +701,26 @@ circos.track(ylim = c(0, 1), panel.fun = function(x, y) {
         xright = pos[1, 1] + 0.05, ytop = pos[1, 2]+ 0.05)
 }, bg.border = 1, track.height = 0.15)
 
+```
+
+```{r}
+##start making a plot in Gviz
+        itrack = IdeogramTrack(genome = "hg19", chromosome = thischr, bands=data);
+        gtrack = GenomeAxisTrack();
+        otcolors = OverlayTrack(trackList = list(dtracknocolor,dtrackred,dtrackorange,dtrackgreen,dtracklightblue));
+
+        mart = useMart(biomart="ENSEMBL_MART_ENSEMBL",dataset="hsapiens_gene_ensembl",host="feb2014.archive.ensembl.org");
+        gencodev19 = BiomartGeneRegionTrack(genome="hg19", biomart=mart, chromosome=thischr, start= start(window), end= end(window), showId=TRUE, geneSymbols=TRUE,transcriptAnnotation="symbol",name="",filter=list(with_ox_refseq_mrna = TRUE),fill="#368C41",col=NULL,col.line=NULL,fontsize=18);
+
+        ##Make an HGE track
+        olapg = findOverlaps(window,HGE);
+        gAnnotTrack = AnnotationTrack(HGE[subjectHits(olapg)],genome="hg19",name="HGE",col=NULL,col.line=NULL,stacking="dense",fill="#D7706A");
+
+
+        pdf(paste0(mcols(hitsranges[i])$SNP,"_",pheno,".pdf"),width=6,height=6);
+
+        plotTracks(c(itrack,gtrack,otcolors,gencodev19,gAnnotTrack),from = start(window),to = end(window),transcriptAnnotation="symbol",add53=TRUE,showBandID=TRUE,cex.bands=0.5,stackHeight=0.3,background.title = "white",col.axis="black",col.title="black",cex.title=0.5,cex.axis=0.7,just.group="right",main=paste0(pheno,": ",mcols(hitsranges[i])$SNP),cex.main=0.8,collapseTranscripts="meta");
+        dev.off();
 ```
 
 

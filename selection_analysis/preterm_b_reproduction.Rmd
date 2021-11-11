@@ -1,0 +1,279 @@
+---
+title: "preterm_b_reproduction"
+author: "Gokberk Alagoz"
+date: "November 5, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(biomaRt)
+library(ggplot2)
+```
+
+```{r read data}
+my_results = read.table("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication/selection_analysis_summary.txt", header = T)
+labella_results = read.csv("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication/41467_2020_17258_MOESM7_ESM.csv", header = T)
+abin_reproduction_resultsDir = "/home/gokala/programs/gsel_vec/gsel_vec/preterm_birth_reproduction_p_clump_changed/final_outputs/pval_zscore_per_anno/"
+abin_reproduction2_resultsDir = "/home/gokala/programs/gsel_vec/gsel_vec/preterm_birth_reproduction_p_clump_changed_run2/final_outputs/pval_zscore_per_anno/"
+
+```
+
+## Evolutionary signatures from pre-term birth GWAS - Reproduction analysis
+
+```{r}
+
+# Get MARKER info from ENSEMBL using rsIDs, so that
+# you can match LaBella SNPs with your SNPs. Because
+# Abin's pipeline outputs result files with only MARKER
+# info.
+snpmart = useMart("ENSEMBL_MART_SNP", 
+                  dataset = "hsapiens_snp", 
+                  path="/biomart/martservice", 
+                  host="https://grch37.ensembl.org")
+
+labella_results$lead_snp = NA
+n = 1
+for (i in labella_results$rsID) {
+        
+        tmp_marker = getBM(attributes = c("chr_name","chrom_start","chrom_end"), 
+                           filters = "snp_filter", 
+                           values = i, #list(tmp_chr,tmp_pos,tmp_pos), 
+                           mart = snpmart)
+        
+        labella_results$lead_snp[n] = paste0(tmp_marker[1,1],":",tmp_marker[1,2])
+        n = n+1
+}
+
+# Remove SNPs that have not MARKER info in Biomart,
+# because I can't match them with my SNPs :/.
+print(paste0(nrow(labella_results[labella_results$lead_snp == "NA:NA",]), 
+             " SNPs will be removed from the comparison plots because MARKER info is not available."))
+labella_results = labella_results[labella_results$lead_snp != "NA:NA",]
+
+```
+
+```{r}
+
+# Subset all results files to have only lead_snp and pvalue columns.
+for (j in dir(abin_reproduction_resultsDir, full.names = T, pattern = "_pval.tsv")) {
+  
+  tmp_result = read.table(j, sep = "\t", header = T, fill = T)
+  tmp_annot = strsplit(strsplit(j, split = "/")[[1]][10], split = "\\.")[[1]][1]
+  
+  # remove lines with missing columns
+  tmp_result = tmp_result[!is.na(tmp_result$pvalue),]
+  # subset
+  tmp_result = tmp_result[,c("lead_snp", "pvalue")]
+  # write
+  write.table(tmp_result, paste0(abin_reproduction_resultsDir, "/test/", tmp_annot, "_subset.tsv"),
+              quote = F, row.names = F, sep = "\t")
+
+}
+
+```
+
+```{r}
+
+for (k in dir(paste0(abin_reproduction_resultsDir,"/test"), full.names = T, pattern = "subset")) {
+  
+  tmp_subset = read.table(k, sep = "\t", header = T, fill = T)
+  tmp_annot = strsplit(strsplit(k, split = "/")[[1]][10], split = "\\.")[[1]][1]
+  
+  # remove lines with missing columns
+  labella_results = merge(labella_results, tmp_subset, by = "lead_snp")
+  colnames(labella_results)[ncol(labella_results)] = tmp_annot
+  
+}
+
+write.table(labella_results, paste0(abin_reproduction_resultsDir, "/test/combined_results.txt"),
+            quote = F, row.names = F, sep = "\t")
+```
+
+
+## Including Plots
+
+```{r comparison plots, echo=FALSE}
+
+# p plots
+
+pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication/scatter_pval_comparison.pdf")
+par(mfrow=c(2,2))
+
+plot(labella_results$argweave, labella_results$argweave_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "Argweave")
+abline(v = -log10(0.05), h = 0.05, col = "red")
+
+plot(labella_results$beta_score, labella_results$betascore_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "BETA score")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$fst_eas_afr, labella_results$fst_eas_afr_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "Fst EAS-AFR")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$fst_eur_eas, labella_results$fst_eur_eas_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "Fst EUR-EAS")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$fst_eur_afr, labella_results$fst_eur_afr_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "Fst EUR-AFR")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$gerp, labella_results$gerp_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "GERP")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$iES_sabeti_eur, labella_results$iES_Sabeti_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "iES Sabeti-EUR")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$linsight, labella_results$linsigh_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "LINSIGHT")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$phyloP100, labella_results$phyloP100_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "phyloP_100way")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$phastcon100, labella_results$phastCon100_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "phastCons_100way")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$xpehh_afr2_eas, labella_results$xpehh_afr2_eas_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "XP-EHH AFR-EAS")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$xpehh_afr2_eur, labella_results$xpehh_afr2_eur_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "XP-EHH AFR-EUR")
+abline(v = 0.05, h = 0.05, col = "red")
+
+plot(labella_results$xpehh_eas_eur, labella_results$xpehh_eas_eur_z_score_pval_subset, 
+     xlab = "LaBella et al. pval", ylab = "Re-run pval", main = "XP-EHH EAS-EUR")
+abline(v = 0.05, h = 0.05, col = "red")
+
+dev.off()
+
+# -log10(p) plots
+pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication/scatter_pval_comparison_logp.pdf")
+par(mfrow=c(2,2))
+
+plot(-log10(labella_results$argweave), -log10(labella_results$argweave_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "Argweave")
+#abline(v = -log10(0.05), h = 0.05, col = "red")
+
+plot(-log10(labella_results$beta_score), -log10(labella_results$betascore_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "BETA score")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$fst_eas_afr), -log10(labella_results$fst_eas_afr_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "Fst EAS-AFR")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$fst_eur_eas), -log10(labella_results$fst_eur_eas_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "Fst EUR-EAS")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$fst_eur_afr), -log10(labella_results$fst_eur_afr_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "Fst EUR-AFR")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$gerp), -log10(labella_results$gerp_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "GERP")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$iES_sabeti_eur), -log10(labella_results$iES_Sabeti_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "iES Sabeti-EUR")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$linsight), -log10(labella_results$linsigh_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "LINSIGHT")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$phyloP100), -log10(labella_results$phyloP100_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "phyloP_100way")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$phastcon100), -log10(labella_results$phastCon100_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "phastCons_100way")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$xpehh_afr2_eas), -log10(labella_results$xpehh_afr2_eas_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "XP-EHH AFR-EAS")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$xpehh_afr2_eur), -log10(labella_results$xpehh_afr2_eur_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "XP-EHH AFR-EUR")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+plot(-log10(labella_results$xpehh_eas_eur), -log10(labella_results$xpehh_eas_eur_z_score_pval_subset), 
+     xlab = "LaBella et al. -log10(pval)", ylab = "Re-run -log10(pval)", main = "XP-EHH EAS-EUR")
+#abline(v = 0.05, h = 0.05, col = "red")
+
+dev.off()
+
+
+```
+
+```{r}
+# Subset all results files to have only lead_snp and pvalue columns.
+
+for (j in dir(abin_reproduction_resultsDir, pattern = "_pval.tsv")) {
+  
+  tmp_result1 = read.table(paste0(abin_reproduction_resultsDir, j), sep = "\t", header = T, fill = T)
+  tmp_result2 = read.table(paste0(abin_reproduction2_resultsDir, j), sep = "\t", header = T, fill = T)
+  tmp_annot = strsplit(strsplit(paste0(abin_reproduction2_resultsDir, j), split = "/")[[1]][10], split = "\\.")[[1]][1]
+  
+  # remove lines with missing columns
+  tmp_result1 = tmp_result1[!is.na(tmp_result1$pvalue),]
+  tmp_result2 = tmp_result2[!is.na(tmp_result2$pvalue),]
+  # subset
+  tmp_result1 = tmp_result1[,c("lead_snp", "pvalue")]
+  tmp_result2 = tmp_result2[,c("lead_snp", "pvalue")]
+  # write
+  write.table(tmp_result1, paste0(abin_reproduction_resultsDir, tmp_annot, "_subset.tsv"),
+              quote = F, row.names = F, sep = "\t")
+  write.table(tmp_result2, paste0(abin_reproduction2_resultsDir, tmp_annot, "_subset.tsv"),
+              quote = F, row.names = F, sep = "\t")
+
+}
+
+my_results = as.data.frame(labella_results$lead_snp)
+colnames(my_results) = "lead_snp"
+for (k in dir(abin_reproduction_resultsDir, pattern = "subset")) {
+  
+  tmp_subset1 = read.table(paste0(abin_reproduction_resultsDir, k), sep = "\t", header = T, fill = T)
+  tmp_subset2 = read.table(paste0(abin_reproduction2_resultsDir, k), sep = "\t", header = T, fill = T)
+  tmp_annot = strsplit(strsplit(paste0(abin_reproduction2_resultsDir, k), split = "/")[[1]][10], split = "\\.")[[1]][1]
+  
+  # remove lines with missing columns
+  my_results = merge(my_results, tmp_subset1, by = "lead_snp")
+  colnames(my_results)[ncol(my_results)] = paste0(tmp_annot, "_run1")
+  my_results = merge(my_results, tmp_subset2, by = "lead_snp")
+  colnames(my_results)[ncol(my_results)] = paste0(tmp_annot, "_run2")
+  
+}
+
+write.table(my_results, paste0(abin_reproduction_resultsDir, "/my_combined_results.txt"),
+            quote = F, row.names = F, sep = "\t")
+
+pdf("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication/scatter_pval_comparison_my_results.pdf")
+par(mfrow=c(2,2))
+for (m in seq(2, ncol(my_results), 2)) {
+    
+    tmp_annot = strsplit(paste0(colnames(my_results)[m]), split = "_")[[1]][1]
+    
+    plot(my_results[,m], my_results[,m+1], 
+     xlab = "Re-run_1 pval", ylab = "Re-run_2 pval", main = tmp_annot)
+    abline(v = 0.05, h = 0.05, col = "red")
+
+}
+dev.off()
+
+```
+
+
+```{r}
+sessionInfo()
+```
+

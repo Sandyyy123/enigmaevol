@@ -12,7 +12,7 @@
 #-----------------------
 # PATHS
 
-matched_snps_annotatedDir="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/SNPsnap_eur_right"
+matched_snps_annotatedDir="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication/SNPsnap_preterm_birth"
 
 #-----------------------
 # MAIN

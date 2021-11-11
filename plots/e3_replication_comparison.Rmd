@@ -234,3 +234,8 @@ ggplot(data = merged3, aes(Region, Prop._h2.x)) +
 ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/e3_rep_partherit__HSE7PCW_SA_yellow.pdf", width = 9, height = 6, unit = "in")
 
 ```
+
+```{r}
+
+```
+

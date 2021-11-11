@@ -68,10 +68,10 @@ ggscatter(for_scatter, x = "right_prop", y = "left_prop",  color = "#EEA300",
 
 # without frontal pole
 for_scatter_woFP = for_scatter[-which(for_scatter$Region=="frontalpole"),]
-ggscatter(for_scatter_woFP, x = "right_prop", y = "left_prop",  color = "#EEA300",
+ggscatter(for_scatter_woFP, x = "right_enrich", y = "left_enrich",  color = "#EEA300",
           add = "reg.line", cor.coef = TRUE, cor.method = "pearson",
-          xlab = "Right Hemisphere", ylab = "Left Hemisphere", title = "Proportion of heritability") +           theme_bw()
-#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/european_lr/eur_l-r_proph2_scatter_wo_frontalpole.pdf",height = 8,width = 8)
+          xlab = "Right Hemisphere", ylab = "Left Hemisphere", title = "SNP-heritability enrichment") +           theme_bw()
+#ggsave("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/plots/partitioned_heritability/european_lr/eur_l-r_enrichment_scatter_wo_frontalpole.pdf",height = 8,width = 8)
 
 
 ```

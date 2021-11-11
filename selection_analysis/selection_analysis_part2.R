@@ -21,11 +21,15 @@ options(stringsAsFactors=FALSE)
 #--------------------------------------------
 # PATHS
 
-CSAregions = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave/CSAregions"
-outDir = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave"
+#CSAregions = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave/CSAregions"
+CSAregions = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication/preterm_birth_regions"
+#outDir = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_hemave"
+outDir = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication"
+#resources = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/"
 resources = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/"
-annots=c("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/primate_phyloP",
-         "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/primate_phastCons")
+#annots=c("/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/primate_phyloP",
+#         "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/primate_phastCons")
+annots="/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/resources/100way_phyloP"
 
 #--------------------------------------------
 # FUNCTIONS
@@ -110,10 +114,10 @@ merge_sort_filter = function(CSAregions, outDir) {
   
   for (i in dir(CSAregions)) {
     tmp_lead_snp = strsplit(i, split = "\\.")[[1]][1]
-    
+    tmp_lead_snp="rs9951714"
     #for (annot_folder in annots) {
       annot_name = strsplit(annot_folder, split = "_")[[1]][4]
-      
+      #annot_name = "phyloP"
       # merge all chromosomes for each lead snp (ignore X and Y chrs)
       for (j in 1:22) {
         system(paste0("cat ", outDir, "/intersects/", tmp_lead_snp, "_chr", j, 
@@ -152,7 +156,7 @@ merge_sort_filter = function(CSAregions, outDir) {
       }
       
       # if more than 60% of control loci are dropped, don't use that lead snp
-      if ((drop_count / length(levels(as.factor(tmp_bed$V5)))) >= 0.6) {
+      if ((drop_count*100 / length(levels(as.factor(tmp_bed$V5)))) >= 0.6) {
         tmp_bed = print(paste0("Too many control regions have missing evol. measures,
                         Thus the lead SNP itself was dropped."))
       }
@@ -178,6 +182,10 @@ get_median_and_distribute = function(outDir) {
                                    std = numeric(),
                                    lead_snp_percentile = numeric(),
                                    test_type = character())
+  
+  colnames(csa_regions_summary) = c("lead_snp", "z_score", "pval",
+                                    "mean", "median", "std",
+                                    "lead_snp_percentile", "test_type")
   lead_snp_count = 1
   for (f in dir(paste0(outDir, "/intersects/"), pattern = ".intersect.sorted.filtered.bed", full.names = T)) {
     tmp_bed = read.table(f)
@@ -202,14 +210,15 @@ get_median_and_distribute = function(outDir) {
     
     pvalue = nrow(control_vars[control_vars$median_score >= median_df$median_score[1],]) / nrow(control_vars)
     
-    if (pvalue > 0.5) {
+    # cancel this loop for now, because you're running it only on phyloP at the moment, which is two-tailed.
+    #if (pvalue > 0.5) {
       pvalue = nrow(control_vars[control_vars$median_score <= median_df$median_score[1],]) / nrow(control_vars)
       pvalue = 2 * pvalue
       test_type = "two-tailed"
-    }
-    else {
-      test_type = "greater-than"
-    }
+    #}
+    #else {
+    #  test_type = "greater-than"
+    #}
 
     csa_regions_summary[lead_snp_count,1] = strsplit(strsplit(f, split = "/")[[1]][16], split = "\\.")[[1]][1]
     csa_regions_summary[lead_snp_count,2] = z_score

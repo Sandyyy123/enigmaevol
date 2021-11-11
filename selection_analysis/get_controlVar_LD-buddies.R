@@ -6,8 +6,8 @@
 # $inDir - ancestry regressed + munged summary statistics directory
 
 genotypeFile = "/data/workspaces/lag/shared_spaces/Resource_DB/1KG_phase3/GRCh37/plink/1KG_phase3_GRCh37_EUR_nonFIN_allchr"
-controlVars = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/SNPsnap_eur_right/matched_snps_annotated_subset.filtered.txt"
-outDir= "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/european_lr/right"
+controlVars = "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication/SNPsnap_preterm_birth/matched_snps_annotated_subset.filtered.txt"
+outDir= "/data/workspaces/lag/workspaces/lg-ukbiobank/projects/enigma_evol/enigma_evo/evolution/results/selection_analysis/preterm_birth_replication"
 
 #-----
 
